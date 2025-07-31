@@ -1,0 +1,6 @@
+{
+  "name": "Pick Vision AI",
+  "description": "An application that uses AI to 'read' basketball parlay images, analyze them with contextual data, and provide speculative predictions of their outcomes using the Gemini API.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
