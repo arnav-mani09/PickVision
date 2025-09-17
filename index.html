@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-T">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pick Vision AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh; /* Ensure body takes at least full viewport height */
+    }
+    /* Custom scrollbar for better aesthetics with dark theme */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #11182b; /* gray-900 */
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4b5563; /* gray-600 */
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #6b7280; /* gray-500 */
+    }
+    .placeholder-glow::placeholder {
+      color: #6b7280; /* gray-500 */
+      opacity: 1;
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.4.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-black text-gray-300">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
