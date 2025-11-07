@@ -476,7 +476,7 @@ const App: React.FC = () => {
       </main>
       <footer className="w-full max-w-4xl mt-12 mb-6 text-center text-sm text-gray-500">
         <p>&copy; {new Date().getFullYear()} Pick Vision AI. For entertainment purposes only.</p>
-        <p>API Key for Gemini is expected to be in `process.env.API_KEY`.</p>
+        <p>Pick Vision is not liable for any losses</p>
       </footer>
     </div>
   );
