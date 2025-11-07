@@ -5,6 +5,8 @@ import { Button } from "./components/ui/Button";
 import { LoadingSpinner } from "./components/ui/LoadingSpinner";
 import type { User } from "./types";
 
+
+
 interface LandingPageProps {
   onLoginSuccess: (user: User) => void;
 }
@@ -77,17 +79,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
       <div className="absolute inset-0 flex justify-center items-center -z-10 overflow-hidden">
         <div className="relative w-[900px] h-[700px]">
           <img
-            src="/parlay1.png"
+            src={`${process.env.PUBLIC_URL}/parlay1.png`}
             alt="Winning Parlay"
             className="absolute top-0 left-1/2 w-[380px] -translate-x-1/2 rotate-[-8deg] opacity-70 animate-float-slow drop-shadow-2xl rounded-xl"
           />
           <img
-            src="/parlay2.png"
+            src={`${process.env.PUBLIC_URL}/parlay2.png`}
             alt="Winning Parlay 2"
             className="absolute top-10 left-[35%] w-[380px] rotate-[7deg] opacity-60 animate-float-slower drop-shadow-2xl rounded-xl"
           />
           <img
-            src="/parlay3.png"
+            src={`${process.env.PUBLIC_URL}/parlay3.png`}
             alt="Winning Parlay 3"
             className="absolute top-20 left-[55%] w-[380px] rotate-[-4deg] opacity-50 animate-float-slowest drop-shadow-2xl rounded-xl"
           />
