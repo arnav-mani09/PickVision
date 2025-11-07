@@ -111,11 +111,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           alt="Pick Vision Logo"
           className="w-[300px] md:w-[400px] drop-shadow-[0_0_45px_rgba(168,85,247,0.9)] mb-6 animate-gentleFloat"
         />
-        <p className="text-gray-300 text-lg md:text-xl tracking-wide p-5 mt-6 drop-shadow-[0_0_40px_rgba(168,85,247,1)]"
+        <p className="absolute font-bold text-gray-200 text-lg md:text-xl tracking-wide px-5 animate-gentleFloat mt-10"
           style={{ 
             zIndex: 10,
             top: "60%",
-            textShadow: "0 0 10px rgba(0, 0, 0, 0.7)",
+            textShadow: `0 0 10px rgba(168, 85, 247, 0.8),
+              0 0 20px rgba(168, 85, 247, 0.6),
+              0 0 40px rgba(168, 85, 247, 0.4)`,
 
           }}>
           Your Personal AI Sports Betting Analyst
