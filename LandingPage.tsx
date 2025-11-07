@@ -111,7 +111,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           alt="Pick Vision Logo"
           className="w-[300px] md:w-[400px] drop-shadow-[0_0_45px_rgba(168,85,247,0.9)] mb-6 animate-gentleFloat"
         />
-        <p className="text-gray-300 text-lg md:text-xl tracking-wide p-5">
+        <p className="text-gray-300 text-lg md:text-xl tracking-wide p-5 mt-6">
           Your Personal AI Sports Betting Analyst
         </p>
       </div>
