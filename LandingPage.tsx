@@ -5,8 +5,6 @@ import { Button } from "./components/ui/Button";
 import { LoadingSpinner } from "./components/ui/LoadingSpinner";
 import type { User } from "./types";
 
-
-
 interface LandingPageProps {
   onLoginSuccess: (user: User) => void;
 }
@@ -18,6 +16,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
   const toggleView = () => {
     setIsLoginView(!isLoginView);
@@ -73,150 +72,143 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
     }
   };
 
-return (
-  <div className="relative min-h-screen bg-black text-gray-200 flex flex-col items-center justify-center overflow-hidden selection:bg-purple-500 selection:text-white">
-    
-    {/* --- Floating Background Cards --- */}
-    <div className="absolute inset-0 flex justify-center items-center z-0 overflow-hidden">
-      <div className="relative w-[900px] h-[700px] flex justify-center items-center">
-        {/* Left Tilt */}
-        <img
-          src="/parlay2.png"
-          alt="Parlay Left"
-          className="absolute w-[200px] rotate-[-10deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700"
-          style={{ left: "calc(50% - 260px)", zIndex: 1 }}
-        />
-
-        {/* Center (Top Layer) */}
-        <img
-          src="/parlay1.png"
-          alt="Parlay Center"
-          className="absolute w-[200px] drop-shadow-[0_0_40px_rgba(168,85,247,0.9)] animate-gentleFloat"
-          style={{ zIndex: 2 }}
-        />
-
-        {/* Right Tilt */}
-        <img
-          src="/parlay3.png"
-          alt="Parlay Right"
-          className="absolute w-[200px] rotate-[10deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700"
-          style={{ right: "calc(50% - 260px)", zIndex: 1 }}
-        />
-      </div>
-    </div>
-
-    {/* --- Title Overlay --- */}
-    <div className="text-center mb-10 flex flex-col items-center justify-center">
-      <img
-        src="/pickvision-logo.png"
-        alt="Pick Vision Logo"
-        className="w-[300px] md:w-[400px] drop-shadow-[0_0_45px_rgba(168,85,247,0.9)] mb-6 animate-gentleFloat"
-      />
-      <p className="text-gray-300 text-lg md:text-xl tracking-wide">
-        Your Personal AI Sports Betting Analyst
-      </p>
-
-    </div>
-
-    {/* --- Auth Card --- */}
-    <div className="absolute top-6 right-6 w-[250px]">
-      <Card className="backdrop-blur-md bg-white/10 border border-white/20 shadow-lg p-6 rounded-xl">
-        <h2 className="text-xl font-semibold text-center text-white mb-4">
-          {isLoginView ? "Sign In" : "Create Account"}
-        </h2>
-        {error && (
-          <div className="bg-red-700 border border-red-900 text-white px-4 py-2 rounded mb-3">
-            {error}
-          </div>
-        )}
-        <form onSubmit={handleAuthAction} className="space-y-4">
-          <Input
-            label="Email"
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+  return (
+    <div className="relative min-h-screen bg-black text-gray-200 flex flex-col items-center justify-center overflow-hidden selection:bg-purple-500 selection:text-white">
+      
+      {/* --- Floating Background Cards --- */}
+      <div className="absolute inset-0 flex justify-center items-center z-0 overflow-hidden">
+        <div className="relative w-[900px] h-[700px] flex justify-center items-center">
+          {/* Left Tilt */}
+          <img
+            src="/parlay2.png"
+            alt="Parlay Left"
+            className="absolute w-[200px] rotate-[-10deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700"
+            style={{ left: "calc(50% - 260px)", zIndex: 1 }}
           />
-          <Input
-            label="Password"
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+
+          {/* Center (Top Layer) */}
+          <img
+            src="/parlay1.png"
+            alt="Parlay Center"
+            className="absolute w-[200px] drop-shadow-[0_0_40px_rgba(168,85,247,0.9)] animate-gentleFloat"
+            style={{ zIndex: 2 }}
           />
-          {!isLoginView && (
-            <Input
-              label="Confirm Password"
-              id="confirm-password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          )}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
-              <LoadingSpinner className="w-5 h-5" />
-            ) : isLoginView ? (
-              "Sign In"
-            ) : (
-              "Sign Up"
-            )}
-          </Button>
-        </form>
-        <div className="mt-3 text-center">
-          <button
-            onClick={toggleView}
-            className="text-sm text-purple-400 hover:text-purple-300 hover:underline"
-          >
-            {isLoginView
-              ? "Need an account? Sign up"
-              : "Already have an account? Sign in"}
-          </button>
+
+          {/* Right Tilt */}
+          <img
+            src="/parlay3.png"
+            alt="Parlay Right"
+            className="absolute w-[200px] rotate-[10deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700"
+            style={{ right: "calc(50% - 260px)", zIndex: 1 }}
+          />
         </div>
-      </Card>
-    </div>
+      </div>
 
-    <footer className="absolute bottom-4 text-xs text-gray-500">
-      © {new Date().getFullYear()} Pick Vision AI. For entertainment purposes only.
-    </footer>
-  </div>
+      {/* --- Title Overlay --- */}
+      <div className="text-center mb-10 flex flex-col items-center justify-center">
+        <img
+          src="/pickvision-logo.png"
+          alt="Pick Vision Logo"
+          className="w-[300px] md:w-[400px] drop-shadow-[0_0_45px_rgba(168,85,247,0.9)] mb-6 animate-gentleFloat"
+        />
+        <p className="text-gray-300 text-lg md:text-xl tracking-wide p-5">
+          Your Personal AI Sports Betting Analyst
+        </p>
+      </div>
+
+      {/* --- Purple Button to Toggle Login --- */}
+      <button
+        onClick={() => setShowLogin(!showLogin)}
+        className="absolute top-6 right-6 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white font-semibold py-2 px-6 rounded-xl shadow-lg hover:scale-105 transition-transform duration-300 z-10"
+      >
+        {showLogin ? "Close" : "Sign In / Sign Up"}
+      </button>
+
+      {/* --- Auth Card --- */}
+      {showLogin && (
+        <div className="absolute top-20 right-6 w-[260px] animate-fadeIn">
+          <Card className="backdrop-blur-md bg-white/10 border border-white/20 shadow-lg p-6 rounded-xl">
+            <h2 className="text-l font-semibold text-center text-white mb-4">
+              {isLoginView ? "Sign In" : "Create Account"}
+            </h2>
+            {error && (
+              <div className="bg-red-700 border border-red-900 text-white px-4 py-2 rounded mb-3">
+                {error}
+              </div>
+            )}
+            <form onSubmit={handleAuthAction} className="space-y-4">
+              <Input
+                label="Email"
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <Input
+                label="Password"
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              {!isLoginView && (
+                <Input
+                  label="Confirm Password"
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              )}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <LoadingSpinner className="w-5 h-5" />
+                ) : isLoginView ? (
+                  "Sign In"
+                ) : (
+                  "Sign Up"
+                )}
+              </Button>
+            </form>
+            <div className="mt-3 text-center">
+              <button
+                onClick={toggleView}
+                className="text-sm text-purple-400 hover:text-purple-300 hover:underline"
+              >
+                {isLoginView
+                  ? "Need an account? Sign up"
+                  : "Already have an account? Sign in"}
+              </button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* --- Footer --- */}
+      <footer className="absolute bottom-4 text-xs text-gray-500">
+        © {new Date().getFullYear()} Pick Vision AI. For entertainment purposes only.
+      </footer>
+    </div>
   );
 };
 
 // --- Floating Animation Keyframes ---
 const style = document.createElement("style");
 style.innerHTML = `
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0) rotate(-8deg); }
-  50% { transform: translateY(-10px) rotate(-8deg); }
-}
-@keyframes float-slower {
-  0%, 100% { transform: translateY(0) rotate(7deg); }
-  50% { transform: translateY(10px) rotate(7deg); }
-}
-@keyframes float-slowest {
-  0%, 100% { transform: translateY(0) rotate(-4deg); }
-  50% { transform: translateY(-6px) rotate(-4deg); }
-}
-.animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
-.animate-float-slower { animation: float-slower 7s ease-in-out infinite; }
-.animate-float-slowest { animation: float-slowest 8s ease-in-out infinite; }
-
 @keyframes gentleFloat {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
-.animate-gentleFloat {
-  animation: gentleFloat 6s ease-in-out infinite;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
+.animate-gentleFloat { animation: gentleFloat 6s ease-in-out infinite; }
+.animate-fadeIn { animation: fadeIn 0.4s ease-in-out; }
 `;
 document.head.appendChild(style);
