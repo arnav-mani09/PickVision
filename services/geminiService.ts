@@ -4,7 +4,14 @@ import { GoogleGenAI, GenerateContentResponse, HarmCategory, HarmBlockThreshold 
 import type { PredictionResult, GroundingChunk, ExtractedImageResult, EditableParlayLeg } from '../types';
 import { GEMINI_API_KEY_ERROR_MESSAGE, GEMINI_MODEL_TEXT, GEMINI_MODEL_VISION } from '../constants';
 
-const API_KEY = process.env.API_KEY;
+// For Vite projects, add this type declaration at the top of the file or in a global .d.ts file:
+// declare interface ImportMeta {
+//   env: {
+//     VITE_API_KEY: string;
+//   };
+// }
+const API_KEY = (import.meta as any).env?.VITE_API_KEY || process.env.VITE_API_KEY;
+
 
 let ai: GoogleGenAI | null = null;
 if (API_KEY) {
