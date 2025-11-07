@@ -83,7 +83,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
             src="/parlay2.png"
             alt="Parlay Left"
             className="absolute w-[200px] rotate-[-10deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700"
-            style={{ left: "calc(50% - 260px)", zIndex: 1 }}
+            style={{ left: "calc(50% - 260px)", zIndex: 2 }}
           />
 
           {/* Center (Top Layer) */}
@@ -91,7 +91,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
             src="/parlay1.png"
             alt="Parlay Center"
             className="absolute w-[200px] drop-shadow-[0_0_40px_rgba(168,85,247,0.9)] animate-gentleFloat"
-            style={{ zIndex: 2 }}
+            style={{ zIndex: 3 }}
           />
 
           {/* Right Tilt */}
@@ -99,7 +99,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
             src="/parlay3.png"
             alt="Parlay Right"
             className="absolute w-[200px] rotate-[10deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700"
-            style={{ right: "calc(50% - 260px)", zIndex: 1 }}
+            style={{ right: "calc(50% - 260px)", zIndex: 2 }}
           />
         </div>
       </div>
@@ -111,7 +111,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           alt="Pick Vision Logo"
           className="w-[300px] md:w-[400px] drop-shadow-[0_0_45px_rgba(168,85,247,0.9)] mb-6 animate-gentleFloat"
         />
-        <p className="text-gray-300 text-lg md:text-xl tracking-wide p-5 mt-6">
+        <p className="text-gray-300 text-lg md:text-xl tracking-wide p-5 mt-6"
+          style={{ zIndex: 1 }}>
           Your Personal AI Sports Betting Analyst
         </p>
       </div>
