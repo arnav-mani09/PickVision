@@ -111,10 +111,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           alt="Pick Vision Logo"
           className="w-[300px] md:w-[400px] drop-shadow-[0_0_45px_rgba(168,85,247,0.9)] mb-6 animate-gentleFloat"
         />
-        <p className="text-gray-300 text-lg md:text-xl tracking-wide p-5 mt-6">
-          Your Personal AI Sports Betting Analyst
-        </p>
       </div>
+      <p
+        className="text-gray-300 text-lg md:text-xl tracking-wide p-5 fixed left-1/2 -translate-x-1/2"
+        style={{ bottom: 50, marginBottom: 0 }}
+      >
+        Your Personal AI Sports Betting Analyst
+      </p>
 
       {/* --- Purple Button to Toggle Login --- */}
       <button
