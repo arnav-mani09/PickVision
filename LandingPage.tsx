@@ -82,28 +82,30 @@ return (
         <img
           src="/parlay1.png"
           alt="Winning Parlay"
-          className="absolute top-0 left-1/2 w-[380px] -translate-x-1/2 rotate-[-8deg] opacity-80 drop-shadow-[0_10px_20px_rgba(255,0,255,0.4)] rounded-xl"
+          className="absolute left-[20%] w-[350px] rotate-[-12deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700 animate-gentleFloat"
         />
 
         <img
           src="/parlay2.png"
           alt="Winning Parlay 2"
-          className="absolute top-10 left-[35%] w-[380px] rotate-[7deg] opacity-60 animate-float-slower drop-shadow-2xl rounded-xl"
+          className="absolute z-10 w-[420px] rotate-[0deg] drop-shadow-[0_0_30px_rgba(168,85,247,0.8)] animate-gentleFloat"
         />
         <img
           src="/parlay3.png"
           alt="Winning Parlay 3"
-          className="absolute top-20 left-[55%] w-[380px] rotate-[-4deg] opacity-50 animate-float-slowest drop-shadow-2xl rounded-xl"
+          className="absolute right-[20%] w-[350px] rotate-[12deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700 animate-gentleFloat"
         />
       </div>
     </div>
 
     {/* --- Title Overlay --- */}
-    <div className="text-center mb-10">
-      <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent drop-shadow-lg">
-        Pick Vision AI
-      </h1>
-      <p className="mt-3 text-gray-400 text-lg md:text-xl">
+    <div className="text-center mb-10 flex flex-col items-center justify-center">
+      <img
+        src="/pickvision-logo.png"
+        alt="Pick Vision Logo"
+        className="w-[200px] mb-4 drop-shadow-[0_0_30px_rgba(168,85,247,0.7)]"
+      />
+      <p className="mt-2 text-gray-300 text-lg md:text-xl tracking-wide">
         Your Personal AI Sports Betting Analyst
       </p>
     </div>
@@ -194,5 +196,19 @@ style.innerHTML = `
 .animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
 .animate-float-slower { animation: float-slower 7s ease-in-out infinite; }
 .animate-float-slowest { animation: float-slowest 8s ease-in-out infinite; }
+
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-gentleFloat {
+  animation: gentleFloat 6s ease-in-out infinite;
+}
+
 `;
 document.head.appendChild(style);
