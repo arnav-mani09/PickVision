@@ -78,22 +78,29 @@ return (
     
     {/* --- Floating Background Cards --- */}
     <div className="absolute inset-0 flex justify-center items-center z-0 overflow-hidden">
-      <div className="relative w-[900px] h-[700px]">
-        <img
-          src="/parlay1.png"
-          alt="Winning Parlay"
-          className="absolute left-[20%] w-[350px] rotate-[-12deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700 animate-gentleFloat"
-        />
-
+      <div className="relative w-[900px] h-[700px] flex justify-center items-center">
+        {/* Left Tilt */}
         <img
           src="/parlay2.png"
-          alt="Winning Parlay 2"
-          className="absolute z-10 w-[420px] rotate-[0deg] drop-shadow-[0_0_30px_rgba(168,85,247,0.8)] animate-gentleFloat"
+          alt="Parlay Left"
+          className="absolute w-[380px] rotate-[-10deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700"
+          style={{ left: "calc(50% - 260px)", zIndex: 1 }}
         />
+
+        {/* Center (Top Layer) */}
+        <img
+          src="/parlay1.png"
+          alt="Parlay Center"
+          className="absolute w-[380px] drop-shadow-[0_0_40px_rgba(168,85,247,0.9)] animate-gentleFloat"
+          style={{ zIndex: 2 }}
+        />
+
+        {/* Right Tilt */}
         <img
           src="/parlay3.png"
-          alt="Winning Parlay 3"
-          className="absolute right-[20%] w-[350px] rotate-[12deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700 animate-gentleFloat"
+          alt="Parlay Right"
+          className="absolute w-[380px] rotate-[10deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700"
+          style={{ right: "calc(50% - 260px)", zIndex: 1 }}
         />
       </div>
     </div>
@@ -103,11 +110,12 @@ return (
       <img
         src="/pickvision-logo.png"
         alt="Pick Vision Logo"
-        className="w-[200px] mb-4 drop-shadow-[0_0_30px_rgba(168,85,247,0.7)]"
+        className="w-[420px] md:w-[500px] drop-shadow-[0_0_45px_rgba(168,85,247,0.9)] mb-6 animate-gentleFloat"
       />
-      <p className="mt-2 text-gray-300 text-lg md:text-xl tracking-wide">
+      <p className="text-gray-300 text-lg md:text-xl tracking-wide">
         Your Personal AI Sports Betting Analyst
       </p>
+
     </div>
 
     {/* --- Auth Card --- */}
