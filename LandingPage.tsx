@@ -77,13 +77,14 @@ return (
   <div className="relative min-h-screen bg-black text-gray-200 flex flex-col items-center justify-center overflow-hidden selection:bg-purple-500 selection:text-white">
     
     {/* --- Floating Background Cards --- */}
-    <div className="absolute inset-0 flex justify-center items-center -z-10 overflow-hidden">
+    <div className="absolute inset-0 flex justify-center items-center z-0 overflow-hidden">
       <div className="relative w-[900px] h-[700px]">
         <img
           src="/parlay1.png"
           alt="Winning Parlay"
-          className="absolute top-0 left-1/2 w-[380px] -translate-x-1/2 rotate-[-8deg] opacity-70 animate-float-slow drop-shadow-2xl rounded-xl"
+          className="absolute top-0 left-1/2 w-[380px] -translate-x-1/2 rotate-[-8deg] opacity-80 drop-shadow-[0_10px_20px_rgba(255,0,255,0.4)] rounded-xl"
         />
+
         <img
           src="/parlay2.png"
           alt="Winning Parlay 2"
