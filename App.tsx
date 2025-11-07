@@ -383,7 +383,102 @@ const App: React.FC = () => {
   if (currentPage === 'home') {
     return <HomePage onProceed={() => setCurrentPage('app')} user={currentUser} onLogout={handleLogout} />;
   }
-
+  return (
+    <div className="min-h-screen bg-black relative flex flex-col">
+      {/* Animated Emojis - Left Side */}
+      <div className="absolute left-0 top-0 h-full w-16 pointer-events-none z-0 overflow-hidden">
+        {[...Array(12)].map((_, i) => (
+          <span
+            key={i}
+            className={`absolute text-3xl animate-emoji-fall`}
+            style={{
+              left: `${Math.random() * 20}px`,
+              top: `${i * 80}px`,
+              animationDelay: `${Math.random() * 2}s`,
+            }}
+          >
+            {["💸", "💰", "💵"][i % 3]}
+          </span>
+        ))}
+      </div>
+      {/* Animated Emojis - Right Side */}
+      <div className="absolute right-0 top-0 h-full w-16 pointer-events-none z-0 overflow-hidden">
+        {[...Array(12)].map((_, i) => (
+          <span
+            key={i}
+            className={`absolute text-3xl animate-emoji-fall`}
+            style={{
+              right: `${Math.random() * 20}px`,
+              top: `${i * 80}px`,
+              animationDelay: `${Math.random() * 2}s`,
+            }}
+          >
+            {["💸", "💰", "💵"][i % 3]}
+          </span>
+        ))}
+      </div>
+      {/* Parlay Images & Logo Centerpiece */}
+      <div className="flex flex-col items-center justify-center flex-1 relative z-10">
+        <div className="relative flex flex-row justify-center items-center mt-12 mb-8">
+          {/* Parlay Images */}
+          <div className="flex flex-row gap-[-40px]">
+            {[1,2,3,4,5,6].map((n, idx) => (
+              <img
+                key={n}
+                src={`/parlay_slip_${n}.png`}
+                alt={`Winning Parlay Slip ${n}`}
+                className={`w-40 h-56 object-cover rounded-lg shadow-2xl absolute`}
+                style={{
+                  left: `${idx * 60 - 120}px`,
+                  transform: `rotate(${(idx - 2.5) * 10}deg) scale(1.05)`,
+                  zIndex: idx,
+                  opacity: 0.85,
+                }}
+              />
+            ))}
+          </div>
+          {/* PickVision AI Logo */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+            <h1
+              className="text-7xl font-extrabold text-white drop-shadow-lg"
+              style={{
+                fontFamily: '"Inter Tight", "Montserrat", "PrizePicks", sans-serif',
+                letterSpacing: '0.05em',
+                textShadow: '0 4px 32px #7c3aed, 0 2px 8px #000',
+                background: 'linear-gradient(90deg, #7c3aed 0%, #fbbf24 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              PickVision AI
+            </h1>
+            <div className="text-center text-xl font-bold text-purple-300 mt-2 tracking-wide">
+              Your Personal AI Sports Betting Analyst
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Sign In Box Top Right */}
+      <div className="absolute top-8 right-8 z-30">
+        <div className="bg-gray-900 bg-opacity-90 rounded-xl shadow-2xl p-8 w-96 border border-purple-700 relative">
+          <AuthPage onLoginSuccess={handleLoginSuccess} />
+        </div>
+      </div>
+      {/* Custom Emoji Animation CSS */}
+      <style>
+        {`
+          @keyframes emoji-fall {
+            0% { transform: translateY(-40px) scale(1) rotate(-10deg); opacity: 0.8; }
+            80% { opacity: 1; }
+            100% { transform: translateY(100vh) scale(1.2) rotate(10deg); opacity: 0.2; }
+          }
+          .animate-emoji-fall {
+            animation: emoji-fall 4.5s linear infinite;
+          }
+        `}
+      </style>
+    </div>
+  );
   return (
     <div className="min-h-screen bg-black text-gray-300 flex flex-col items-center p-4 selection:bg-purple-500 selection:text-white">
       <Header 
