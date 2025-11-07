@@ -83,7 +83,7 @@ return (
         <img
           src="/parlay2.png"
           alt="Parlay Left"
-          className="absolute w-[380px] rotate-[-10deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700"
+          className="absolute w-[200px] rotate-[-10deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700"
           style={{ left: "calc(50% - 260px)", zIndex: 1 }}
         />
 
@@ -91,7 +91,7 @@ return (
         <img
           src="/parlay1.png"
           alt="Parlay Center"
-          className="absolute w-[380px] drop-shadow-[0_0_40px_rgba(168,85,247,0.9)] animate-gentleFloat"
+          className="absolute w-[200px] drop-shadow-[0_0_40px_rgba(168,85,247,0.9)] animate-gentleFloat"
           style={{ zIndex: 2 }}
         />
 
@@ -99,7 +99,7 @@ return (
         <img
           src="/parlay3.png"
           alt="Parlay Right"
-          className="absolute w-[380px] rotate-[10deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700"
+          className="absolute w-[200px] rotate-[10deg] drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-transform duration-700"
           style={{ right: "calc(50% - 260px)", zIndex: 1 }}
         />
       </div>
@@ -110,7 +110,7 @@ return (
       <img
         src="/pickvision-logo.png"
         alt="Pick Vision Logo"
-        className="w-[420px] md:w-[500px] drop-shadow-[0_0_45px_rgba(168,85,247,0.9)] mb-6 animate-gentleFloat"
+        className="w-[300px] md:w-[400px] drop-shadow-[0_0_45px_rgba(168,85,247,0.9)] mb-6 animate-gentleFloat"
       />
       <p className="text-gray-300 text-lg md:text-xl tracking-wide">
         Your Personal AI Sports Betting Analyst
@@ -119,7 +119,7 @@ return (
     </div>
 
     {/* --- Auth Card --- */}
-    <div className="absolute top-6 right-6 w-[320px]">
+    <div className="absolute top-6 right-6 w-[250px]">
       <Card className="backdrop-blur-md bg-white/10 border border-white/20 shadow-lg p-6 rounded-xl">
         <h2 className="text-xl font-semibold text-center text-white mb-4">
           {isLoginView ? "Sign In" : "Create Account"}
