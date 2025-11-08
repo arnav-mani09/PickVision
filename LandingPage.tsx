@@ -127,14 +127,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
       {/* --- Purple Button to Toggle Login --- */}
       <button
         onClick={() => setShowLogin(!showLogin)}
-        className="absolute top-6 right-6 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white font-semibold py-2 px-6 rounded-xl shadow-lg hover:scale-105 transition-transform duration-300 z-10"
+        className="absolute bottom-6 right-6 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white font-semibold py-2 px-6 rounded-xl shadow-lg hover:scale-105 transition-transform duration-300 z-10"
       >
         {showLogin ? "Close" : "Sign In / Sign Up"}
       </button>
 
       {/* --- Auth Card --- */}
       {showLogin && (
-        <div className="absolute top-20 right-6 w-[260px] animate-fadeIn">
+        <div className="absolute bottom-20 right-6 w-[260px] animate-fadeIn">
           <Card className="backdrop-blur-md bg-white/10 border border-white/20 shadow-lg p-6 rounded-xl">
             <h2 className="text-l font-semibold text-center text-white mb-4">
               {isLoginView ? "Sign In" : "Create Account"}
