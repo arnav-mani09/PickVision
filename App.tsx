@@ -14,6 +14,7 @@ import { PastParlaysDisplay } from './components/PastParlaysDisplay';
 import { Input } from './components/ui/Input';
 import { Card } from './components/ui/Card';
 import { LandingPage } from "./LandingPage";
+import SupportSidebar from './components/SupportSidebar';
 
 
 
@@ -271,6 +272,9 @@ const App: React.FC = () => {
       setImageAnalysisResult({ rawOutput: errorMessage, structuredLegs: null, error: errorMessage });
       setIsLoadingImageProcessing(false);
     }
+
+    
+
   }, [clearAll]);
 
   const handleUpdateParlayLegCondition = useCallback((legId: string, newCondition: string) => {
@@ -382,7 +386,6 @@ const App: React.FC = () => {
   return <LandingPage onLoginSuccess={handleLoginSuccess} />;
 }
 
-
   return (
     <div className="min-h-screen bg-black text-gray-300 flex flex-col items-center p-4 selection:bg-purple-500 selection:text-white">
       <Header 
@@ -478,6 +481,18 @@ const App: React.FC = () => {
         <p>&copy; {new Date().getFullYear()} Pick Vision AI. For entertainment purposes only.</p>
         <p>Pick Vision is not liable for any losses</p>
       </footer>
+      <div className="fixed bottom-4 right-4 bg-gray-900 border border-purple-500 rounded-lg shadow-[0_0_20px_rgba(168,85,247,0.6)] p-4 text-white w-64 z-[9999]">
+        <h2 className="text-lg font-semibold text-purple-400 mb-1">Need help?</h2>
+        <p className="text-sm text-gray-300">
+          Email:{" "}
+          <a
+            href="mailto:pickvisionai@gmail.com"
+            className="text-purple-400 hover:text-purple-300 underline"
+          >
+            pickvisionai@gmail.com
+          </a>
+        </p>
+      </div>
     </div>
   );
 };
