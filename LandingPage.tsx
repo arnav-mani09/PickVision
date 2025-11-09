@@ -113,7 +113,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         />
         <p className="absolute font-bold text-gray-200 text-lg md:text-xl tracking-wide px-5 animate-gentleFloat mt-10"
           style={{ 
-            zIndex: 10,
+            zIndex: 5,
             top: "60%",
             textShadow: `0 0 10px rgba(168, 85, 247, 0.8),
               0 0 20px rgba(168, 85, 247, 0.6),
@@ -134,7 +134,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
 
       {/* --- Auth Card --- */}
       {showLogin && (
-        <div className="absolute bottom-20 right-6 w-[260px] animate-fadeIn">
+        <div className="absolute bottom-20 right-6 w-[260px] animate-fadeIn z-[50]">
           <Card className="backdrop-blur-md bg-white/10 border border-white/20 shadow-lg p-6 rounded-xl">
             <h2 className="text-l font-semibold text-center text-white mb-4">
               {isLoginView ? "Sign In" : "Create Account"}
