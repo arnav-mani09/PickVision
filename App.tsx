@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from '@vercel/analytics/react';
 import { Header } from './components/Header';
 import { ImageUploader } from './components/ImageUploader';
 import { EditableParlayCard } from './components/EditableParlayCard';
