@@ -1,5 +1,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/next';
 import { Header } from './components/Header';
 import { ImageUploader } from './components/ImageUploader';
 import { EditableParlayCard } from './components/EditableParlayCard';
@@ -493,6 +494,7 @@ const App: React.FC = () => {
           </a>
         </p>
       </div>
+      <Analytics />
     </div>
   );
 };
