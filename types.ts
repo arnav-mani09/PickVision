@@ -73,5 +73,6 @@ export interface PastParlay {
 }
 
 export interface User {
+  id: string;
   email: string;
 }

@@ -4,6 +4,7 @@ import { Input } from "./components/ui/Input";
 import { Button } from "./components/ui/Button";
 import { LoadingSpinner } from "./components/ui/LoadingSpinner";
 import type { User } from "./types";
+import { supabase } from "./services/supabaseClient";
 
 interface LandingPageProps {
   onLoginSuccess: (user: User) => void;
@@ -41,28 +42,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
     }
 
     setIsLoading(true);
-    await new Promise((res) => setTimeout(res, 500));
 
     try {
       if (isLoginView) {
-        const users = JSON.parse(localStorage.getItem("pickVisionAIUsers") || "[]");
-        const user = users.find((u: any) => u.email === email && u.password === password);
-        if (user) {
-          sessionStorage.setItem("pickVisionAICurrentUser", JSON.stringify({ email }));
-          onLoginSuccess({ email });
-        } else {
-          setError("Invalid email or password.");
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          setError(error.message);
+          return;
+        }
+        if (data.session?.user) {
+          onLoginSuccess({ id: data.session.user.id, email: data.session.user.email || email });
         }
       } else {
-        const users = JSON.parse(localStorage.getItem("pickVisionAIUsers") || "[]");
-        if (users.some((u: any) => u.email === email)) {
-          setError("An account with this email already exists.");
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          setError(error.message);
+          return;
+        }
+        if (data.session?.user) {
+          onLoginSuccess({ id: data.session.user.id, email: data.session.user.email || email });
         } else {
-          const newUser = { email, password };
-          users.push(newUser);
-          localStorage.setItem("pickVisionAIUsers", JSON.stringify(users));
-          sessionStorage.setItem("pickVisionAICurrentUser", JSON.stringify({ email }));
-          onLoginSuccess({ email });
+          setError("Check your email to confirm your account before signing in.");
         }
       }
     } catch (e) {
