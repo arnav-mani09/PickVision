@@ -14,6 +14,7 @@ import { PastParlaysDisplay } from './components/PastParlaysDisplay';
 import { LandingPage } from "./LandingPage";
 import { TermsModal } from './components/TermsModal';
 import { supabase } from './services/supabaseClient';
+import { PicksOfDay } from './components/PicksOfDay';
 
 
 
@@ -24,6 +25,18 @@ const formatParlayLegsToString = (legs: EditableParlayLeg[]): string => {
   return legs.map(leg => 
     `${leg.playerTeam} - ${leg.stat} - ${leg.condition} ${leg.value || ''}`.trim()
   ).join('\n- ');
+};
+
+const hasActionableSuggestions = (suggestions?: string | null): boolean => {
+  if (!suggestions) return false;
+  const normalized = suggestions.trim().toLowerCase();
+  if (!normalized) return false;
+  const noSuggestionPhrases = [
+    "no suggestions",
+    "no suggestions provided",
+    "no suggestions could be generated",
+  ];
+  return !noSuggestionPhrases.some((phrase) => normalized.includes(phrase));
 };
 
 const App: React.FC = () => {
@@ -213,8 +226,10 @@ const App: React.FC = () => {
 
     try {
       const result = await getEnhancedParlayPrediction(parlayDetailsForPrediction);
+      const outcomeOverride = hasActionableSuggestions(result.suggestions) ? 'MISS' : result.overallOutcome;
       const fullResult: PredictionResult = {
         ...result,
+        overallOutcome: outcomeOverride,
         parlaySentForPrediction: parlayDetailsForPrediction, 
         imagePreviewUrl: imagePreviewUrl,
       };
@@ -359,11 +374,13 @@ const App: React.FC = () => {
             </>
           ) : (
             <>
-              <ImageUploader 
-                onImageUpload={handleImageUpload} 
-                imagePreviewUrl={imagePreviewUrl}
-                isLoading={isLoadingImageProcessing}
-                onClear={clearAll}
+            <PicksOfDay />
+
+            <ImageUploader 
+              onImageUpload={handleImageUpload} 
+              imagePreviewUrl={imagePreviewUrl}
+              isLoading={isLoadingImageProcessing}
+              onClear={clearAll}
                 hasUploadedImage={!!uploadedImage}
               />
 

@@ -207,7 +207,7 @@ Your task is to:
 5.  Provide actionable "suggestions" to improve the parlay's chances of winning, limited to 2-3 bullet points.
     - If a leg is risky, suggest an alternative (e.g., flipping 'Over' to 'Under').
     - Frame suggestions as direct, helpful advice. Each bullet point MUST start with a hyphen (-) and end with a newline character (\\n).
-    - If the parlay looks good, state that and explain why in a single bullet point.
+    - If the parlay looks truly elite and no changes are needed, set "suggestions" to "No suggestions." (exact string).
 6.  Summarize the key pieces of contextual information you found (or couldn't find) in the 'context_summary' field using very concise bullet points (max 3-4). Each bullet point MUST start with a hyphen (-) and end with a newline character (\\n).
 
 PARLAY DETAILS:
@@ -225,7 +225,7 @@ CRITICAL JSON FORMATTING RULES: All string values MUST be properly escaped. This
   "confidence_level": "High" | "Medium" | "Low"
 }
 
-Be critical and insightful. If the parlay details are too vague or you lack sufficient data, set prediction to "INDETERMINATE".
+Be critical and insightful. Only output "HIT" when you are almost entirely sure the parlay will hit AND there are no changes to be made. If you provide any actionable suggestions, set prediction to "MISS". If the parlay details are too vague or you lack sufficient data, set prediction to "INDETERMINATE".
 Adhere strictly to these JSON formatting and escaping rules.
 `;
   let genAIResponse: GenerateContentResponse | null = null;
