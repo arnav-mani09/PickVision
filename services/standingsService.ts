@@ -1,15 +1,7 @@
 import { supabase } from './supabaseClient';
 
 const getFunctionAuthHeaders = async (): Promise<Record<string, string> | undefined> => {
-  const { data } = await supabase.auth.getSession();
-  const accessToken = data.session?.access_token;
   const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-  if (accessToken) {
-    return {
-      Authorization: `Bearer ${accessToken}`,
-      ...(anonKey ? { apikey: anonKey } : {}),
-    };
-  }
   if (!anonKey) return undefined;
   return {
     Authorization: `Bearer ${anonKey}`,

@@ -46,6 +46,7 @@ const App: React.FC = () => {
   const [hasDeclinedTerms, setHasDeclinedTerms] = useState(false);
 
   const [currentPage, setCurrentPage] = useState<'home' | 'app'>('home');
+  const [appTab, setAppTab] = useState<'picks' | 'parlay'>('picks');
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   
@@ -350,9 +351,37 @@ const App: React.FC = () => {
           user={currentUser}
           onLogout={handleLogout}
          />
-        <Button onClick={() => setCurrentPage('home')} variant="secondary" className="mb-6">
-            Back to Home
-        </Button>
+        <div className="mb-6 flex w-full max-w-4xl flex-col gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => setAppTab('picks')}
+                className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                  appTab === 'picks'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                Picks of the Day
+              </button>
+              <button
+                type="button"
+                onClick={() => setAppTab('parlay')}
+                className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                  appTab === 'parlay'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                Parlay Lab
+              </button>
+            </div>
+            <Button onClick={() => setCurrentPage('home')} variant="secondary">
+              Back to Home
+            </Button>
+          </div>
+        </div>
         <main className="w-full max-w-4xl mt-2 space-y-8">
           {error && (
             <div className="bg-red-700 border border-red-900 text-white px-4 py-3 rounded relative shadow-lg" role="alert">
@@ -374,64 +403,68 @@ const App: React.FC = () => {
             </>
           ) : (
             <>
-            <PicksOfDay />
-
-            <ImageUploader 
-              onImageUpload={handleImageUpload} 
-              imagePreviewUrl={imagePreviewUrl}
-              isLoading={isLoadingImageProcessing}
-              onClear={clearAll}
-                hasUploadedImage={!!uploadedImage}
-              />
-
-              {isLoadingImageProcessing && (
-                <div className="flex justify-center items-center p-6 bg-gray-900 rounded-lg shadow-xl">
-                  <LoadingSpinner /><p className="ml-3 text-lg font-semibold">Analyzing your parlay image...</p>
-                </div>
-              )}
-              
-              {!isLoadingImageProcessing && imageAnalysisResult && (
+              {appTab === 'picks' ? (
+                <PicksOfDay />
+              ) : (
                 <>
-                  {currentParlayLegs && currentParlayLegs.length > 0 ? (
-                    <EditableParlayCard 
-                      legs={currentParlayLegs}
-                      onUpdateLegCondition={handleUpdateParlayLegCondition}
-                      title="Verify & Edit Extracted Parlay"
-                    />
-                  ) : (
-                    <ExtractedInfoDisplay 
-                      title="AI Image Analysis Output" 
-                      info={imageAnalysisResult.error ? `Error: ${imageAnalysisResult.error}\n\nRaw Output:\n${imageAnalysisResult.rawOutput}` : imageAnalysisResult.rawOutput } 
-                    />
+                  <ImageUploader 
+                    onImageUpload={handleImageUpload} 
+                    imagePreviewUrl={imagePreviewUrl}
+                    isLoading={isLoadingImageProcessing}
+                    onClear={clearAll}
+                    hasUploadedImage={!!uploadedImage}
+                  />
+
+                  {isLoadingImageProcessing && (
+                    <div className="flex justify-center items-center p-6 bg-gray-900 rounded-lg shadow-xl">
+                      <LoadingSpinner /><p className="ml-3 text-lg font-semibold">Analyzing your parlay image...</p>
+                    </div>
+                  )}
+                  
+                  {!isLoadingImageProcessing && imageAnalysisResult && (
+                    <>
+                      {currentParlayLegs && currentParlayLegs.length > 0 ? (
+                        <EditableParlayCard 
+                          legs={currentParlayLegs}
+                          onUpdateLegCondition={handleUpdateParlayLegCondition}
+                          title="Verify & Edit Extracted Parlay"
+                        />
+                      ) : (
+                        <ExtractedInfoDisplay 
+                          title="AI Image Analysis Output" 
+                          info={imageAnalysisResult.error ? `Error: ${imageAnalysisResult.error}\n\nRaw Output:\n${imageAnalysisResult.rawOutput}` : imageAnalysisResult.rawOutput } 
+                        />
+                      )}
+
+                      {!predictionResult && !isLoadingPrediction && (
+                          <Button 
+                            onClick={handleGetPrediction} 
+                            disabled={isLoadingPrediction || isLoadingImageProcessing || !canAttemptPrediction}
+                            className="w-full bg-green-600 hover:bg-green-700 text-lg py-3"
+                          >
+                            {isLoadingPrediction ? 'Getting Prediction...' : 'Get AI Prediction & Analysis'}
+                          </Button>
+                      )}
+                    </>
+                  )}
+                  
+                  {isLoadingPrediction && !predictionResult && (
+                    <div className="flex justify-center items-center p-6 bg-gray-900 rounded-lg shadow-xl">
+                      <LoadingSpinner /><p className="ml-3 text-lg font-semibold">Searching web & generating analysis...</p>
+                    </div>
                   )}
 
-                  {!predictionResult && !isLoadingPrediction && (
-                       <Button 
-                          onClick={handleGetPrediction} 
-                          disabled={isLoadingPrediction || isLoadingImageProcessing || !canAttemptPrediction}
-                          className="w-full bg-green-600 hover:bg-green-700 text-lg py-3"
-                        >
-                         {isLoadingPrediction ? 'Getting Prediction...' : 'Get AI Prediction & Analysis'}
-                        </Button>
+                  {predictionResult && !isLoadingPrediction && (
+                    <PredictionDisplay result={predictionResult} />
                   )}
+                  
+                  <PastParlaysDisplay 
+                    parlays={pastParlays} 
+                    onViewParlay={handleViewParlay} 
+                    onClearHistory={handleClearHistory}
+                  />
                 </>
               )}
-              
-              {isLoadingPrediction && !predictionResult && (
-                 <div className="flex justify-center items-center p-6 bg-gray-900 rounded-lg shadow-xl">
-                  <LoadingSpinner /><p className="ml-3 text-lg font-semibold">Searching web & generating analysis...</p>
-                </div>
-              )}
-
-              {predictionResult && !isLoadingPrediction && (
-                <PredictionDisplay result={predictionResult} />
-              )}
-              
-              <PastParlaysDisplay 
-                parlays={pastParlays} 
-                onViewParlay={handleViewParlay} 
-                onClearHistory={handleClearHistory}
-              />
             </>
           )}
         </main>

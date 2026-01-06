@@ -294,3 +294,129 @@ Adhere strictly to these JSON formatting and escaping rules.
     };
   }
 };
+
+type DailyPropReasonInput = {
+  player: string;
+  statLabel: string;
+  side?: string;
+  line: string;
+  matchup?: string;
+  confidence?: number;
+  impliedProbability?: number;
+};
+
+export const getDailyPropReasons = async (
+  props: DailyPropReasonInput[]
+): Promise<string[]> => {
+  if (!ai) {
+    return props.map(() => '');
+  }
+  if (props.length === 0) return [];
+
+  const prompt = `
+You are a sports betting analyst. Write one short sentence (max 16 words) explaining why each specific side (Over/Under) is ranked in today's top 10.
+Only use the provided info (no browsing). Do not mention data sources, models, or uncertainty.
+Return JSON only: {"reasons":["..."]} with array length = ${props.length}.
+
+Props:
+${props
+  .map(
+    (prop, index) =>
+      `${index + 1}. ${prop.player} ${prop.side ?? ''} ${prop.line} ${prop.statLabel} ${
+        prop.matchup ? `(${prop.matchup})` : ''
+      } ${prop.confidence ? `confidence:${prop.confidence}` : ''} ${
+        prop.impliedProbability ? `implied:${prop.impliedProbability}` : ''
+      }`
+  )
+  .join('\n')}
+`;
+
+  const response: GenerateContentResponse = await ai.models.generateContent({
+    model: GEMINI_MODEL_TEXT,
+    contents: prompt,
+    config: {
+      safetySettings,
+      responseMimeType: "application/json",
+    },
+  });
+
+  let jsonStr = response.text.trim();
+  const fenceRegex = /^```(\w*)?\s*\n?(.*?)\n?\s*```$/s;
+  const match = jsonStr.match(fenceRegex);
+  if (match && match[2]) {
+    jsonStr = match[2].trim();
+  }
+
+  const parsed = JSON.parse(jsonStr);
+  if (!parsed?.reasons || !Array.isArray(parsed.reasons)) {
+    throw new Error('AI did not return a reasons array.');
+  }
+  return parsed.reasons.map((reason: unknown) => String(reason ?? '').trim());
+};
+
+type DailyPropSuggestion = {
+  player: string;
+  statLabel: string;
+  side: 'Over' | 'Under';
+  line: string;
+  matchup?: string;
+  confidence: number;
+  reason: string;
+};
+
+export const getDailyPropSuggestions = async (
+  dateLabel: string,
+  maxProps: number
+): Promise<DailyPropSuggestion[]> => {
+  if (!ai) {
+    return [];
+  }
+
+  const prompt = `
+You are an expert NBA props analyst. Use web search to find today's NBA games, available player props, and the strongest consensus or implied edges.
+Return the top ${maxProps} props with the absolute highest probability of hitting across all stat types.
+
+Rules:
+- Each item MUST include: player, statLabel, side (Over/Under), line (must end with .5), matchup (optional), confidence (0-1), reason (1 short sentence, max 18 words).
+- statLabel MUST be one of: Points, Rebounds, Assists, PRA, PR, PA, RA, 3PT Made, Turnovers, Blocks, Steals.
+- NEVER return "Player Prop" or "Prop".
+- Do NOT include parlays. Single props only.
+- Avoid duplicates (same player + statLabel + line).
+- Confidence must be numeric between 0 and 1, and should be >= 0.60 unless no options exist.
+- Sort results by confidence descending.
+- Output JSON only: {"props":[...]}.
+
+Date context: ${dateLabel}
+`;
+
+  const response: GenerateContentResponse = await ai.models.generateContent({
+    model: GEMINI_MODEL_TEXT,
+    contents: prompt,
+    config: {
+      tools: [{ googleSearch: {} }],
+      safetySettings,
+    },
+  });
+
+  let jsonStr = response.text.trim();
+  const fenceRegex = /^```(\w*)?\s*\n?(.*?)\n?\s*```$/s;
+  const match = jsonStr.match(fenceRegex);
+  if (match && match[2]) {
+    jsonStr = match[2].trim();
+  }
+
+  const parsed = JSON.parse(jsonStr);
+  if (!parsed?.props || !Array.isArray(parsed.props)) {
+    throw new Error('AI did not return a props array.');
+  }
+
+  return parsed.props.map((prop: DailyPropSuggestion) => ({
+    player: String(prop.player ?? '').trim(),
+    statLabel: String(prop.statLabel ?? '').trim(),
+    side: prop.side === 'Under' ? 'Under' : 'Over',
+    line: String(prop.line ?? '').trim(),
+    matchup: prop.matchup ? String(prop.matchup).trim() : undefined,
+    confidence: Number(prop.confidence ?? 0),
+    reason: String(prop.reason ?? '').trim(),
+  }));
+};
