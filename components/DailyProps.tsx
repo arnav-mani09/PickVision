@@ -148,10 +148,12 @@ export const DailyProps: React.FC<DailyPropsProps> = ({ onPropsLoaded }) => {
         const dateLabel = formatPstDate();
         const cacheKey = `pickvision:daily-props:${dateLabel}`;
         const cached = localStorage.getItem(cacheKey);
+        let cachedProps: DailyProp[] | null = null;
         if (cached) {
           try {
             const parsed = JSON.parse(cached) as { props: DailyProp[]; timestamp: string };
             if (Array.isArray(parsed.props) && parsed.props.length > 0) {
+              cachedProps = parsed.props;
               setProps(parsed.props);
               onPropsLoaded?.(parsed.props);
               setActiveIndex(0);
@@ -211,10 +213,19 @@ export const DailyProps: React.FC<DailyPropsProps> = ({ onPropsLoaded }) => {
         );
       } catch (fetchError) {
         const message = fetchError instanceof Error ? fetchError.message : 'Failed to load props.';
-        if (message.includes('429') || message.toLowerCase().includes('quota')) {
+        if (
+          message.includes('429') ||
+          message.toLowerCase().includes('quota') ||
+          message.toLowerCase().includes('not json')
+        ) {
           setHasTechnicalIssue(true);
         } else {
           setError(message);
+        }
+        if (!props.length && cachedProps) {
+          setProps(cachedProps);
+          onPropsLoaded?.(cachedProps);
+          setLastUpdated(`${formatPstDate()} (cached)`);
         }
       } finally {
         setIsLoading(false);

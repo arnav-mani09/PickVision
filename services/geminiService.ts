@@ -405,7 +405,12 @@ Date context: ${dateLabel}
     jsonStr = match[2].trim();
   }
 
-  const parsed = JSON.parse(jsonStr);
+  let parsed: any;
+  try {
+    parsed = JSON.parse(jsonStr);
+  } catch (error) {
+    throw new Error('AI response not JSON.');
+  }
   if (!parsed?.props || !Array.isArray(parsed.props)) {
     throw new Error('AI did not return a props array.');
   }
