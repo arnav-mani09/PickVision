@@ -144,11 +144,11 @@ export const DailyProps: React.FC<DailyPropsProps> = ({ onPropsLoaded }) => {
       setError(null);
       setHasTechnicalIssue(false);
 
+      let cachedProps: DailyProp[] | null = null;
       try {
         const dateLabel = formatPstDate();
         const cacheKey = `pickvision:daily-props:${dateLabel}`;
         const cached = localStorage.getItem(cacheKey);
-        let cachedProps: DailyProp[] | null = null;
         if (cached) {
           try {
             const parsed = JSON.parse(cached) as { props: DailyProp[]; timestamp: string };
