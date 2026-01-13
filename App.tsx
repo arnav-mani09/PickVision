@@ -63,39 +63,14 @@ const App: React.FC = () => {
   const [viewingParlay, setViewingParlay] = useState<PredictionResult | null>(null);
   
   useEffect(() => {
-    let isMounted = true;
-
-    const initializeAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!isMounted) return;
-      if (data.session?.user) {
-        setCurrentUser({
-          id: data.session.user.id,
-          email: data.session.user.email || '',
-        });
-      } else {
-        setCurrentUser(null);
-      }
-      setIsAuthenticating(false);
-    };
-
-    initializeAuth();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setCurrentUser({
-          id: session.user.id,
-          email: session.user.email || '',
-        });
-      } else {
-        setCurrentUser(null);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      authListener.subscription.unsubscribe();
-    };
+    const storedUserId = localStorage.getItem('pickVisionUserId');
+    const storedEmail = localStorage.getItem('pickVisionUserEmail') || '';
+    if (storedUserId) {
+      setCurrentUser({ id: storedUserId, email: storedEmail });
+    } else {
+      setCurrentUser(null);
+    }
+    setIsAuthenticating(false);
   }, []);
 
   useEffect(() => {
@@ -308,7 +283,8 @@ const App: React.FC = () => {
   };
 
   const handleLogout = () => {
-    supabase.auth.signOut();
+    localStorage.removeItem('pickVisionUserId');
+    localStorage.removeItem('pickVisionUserEmail');
     setCurrentUser(null);
   };
 

@@ -4,8 +4,6 @@ import { Input } from "./components/ui/Input";
 import { Button } from "./components/ui/Button";
 import { LoadingSpinner } from "./components/ui/LoadingSpinner";
 import type { User } from "./types";
-import { supabase } from "./services/supabaseClient";
-
 interface LandingPageProps {
   onLoginSuccess: (user: User) => void;
 }
@@ -36,6 +34,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
       return;
     }
 
+    if (!email.includes("@") || !email.includes(".")) {
+      setError("Please enter a valid email format.");
+      return;
+    }
+
     if (!isLoginView && password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -44,27 +47,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
     setIsLoading(true);
 
     try {
-      if (isLoginView) {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          setError(error.message);
-          return;
-        }
-        if (data.session?.user) {
-          onLoginSuccess({ id: data.session.user.id, email: data.session.user.email || email });
-        }
-      } else {
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) {
-          setError(error.message);
-          return;
-        }
-        if (data.session?.user) {
-          onLoginSuccess({ id: data.session.user.id, email: data.session.user.email || email });
-        } else {
-          setError("Check your email to confirm your account before signing in.");
-        }
-      }
+      const storedUserId = localStorage.getItem("pickVisionUserId") || `${Date.now()}-${Math.random()}`;
+      localStorage.setItem("pickVisionUserId", storedUserId);
+      localStorage.setItem("pickVisionUserEmail", email);
+      onLoginSuccess({ id: storedUserId, email });
     } catch (e) {
       setError(e instanceof Error ? e.message : "An unexpected error occurred.");
     } finally {
