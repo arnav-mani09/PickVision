@@ -366,14 +366,15 @@ type DailyPropSuggestion = {
 
 export const getDailyPropSuggestions = async (
   dateLabel: string,
-  maxProps: number
+  maxProps: number,
+  leagueLabel: string
 ): Promise<DailyPropSuggestion[]> => {
   if (!ai) {
     return [];
   }
 
   const prompt = `
-You are an expert NBA props analyst. Use web search to find today's NBA games, available player props, and the strongest consensus or implied edges.
+You are an expert ${leagueLabel} props analyst. Use web search to find today's ${leagueLabel} games, available player props, and the strongest consensus or implied edges.
 Return the top ${maxProps} props with the absolute highest probability of hitting across all stat types.
 
 Rules:

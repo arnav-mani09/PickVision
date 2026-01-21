@@ -122,10 +122,12 @@ const allowedStatLabels = new Set([
 ]);
 
 type DailyPropsProps = {
+  leagueId: string;
+  leagueLabel: string;
   onPropsLoaded?: (props: DailyProp[]) => void;
 };
 
-export const DailyProps: React.FC<DailyPropsProps> = ({ onPropsLoaded }) => {
+export const DailyProps: React.FC<DailyPropsProps> = ({ leagueId, leagueLabel, onPropsLoaded }) => {
   const [props, setProps] = useState<DailyProp[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -147,7 +149,7 @@ export const DailyProps: React.FC<DailyPropsProps> = ({ onPropsLoaded }) => {
       let cachedProps: DailyProp[] | null = null;
       try {
         const dateLabel = formatPstDate();
-        const cacheKey = `pickvision:daily-props:${dateLabel}`;
+        const cacheKey = `pickvision:daily-props:${leagueId}:${dateLabel}`;
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           try {
@@ -166,7 +168,7 @@ export const DailyProps: React.FC<DailyPropsProps> = ({ onPropsLoaded }) => {
           }
         }
 
-        const aiProps = await getDailyPropSuggestions(dateLabel, 14);
+        const aiProps = await getDailyPropSuggestions(dateLabel, 14, leagueLabel);
 
         const deduped = new Map<string, DailyProp>();
         aiProps.forEach((prop, index) => {
@@ -248,7 +250,9 @@ export const DailyProps: React.FC<DailyPropsProps> = ({ onPropsLoaded }) => {
       <div className="p-6 border-b border-gray-800">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h3 className="text-2xl font-semibold text-purple-300">Top 10 NBA Props (Daily)</h3>
+        <h3 className="text-2xl font-semibold text-purple-300">
+          Top 10 {leagueLabel} Props (Daily)
+        </h3>
             <p className="text-sm text-gray-400 mt-1">
               Ranked by the strongest consensus or implied probability available today.
             </p>

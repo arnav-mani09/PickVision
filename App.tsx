@@ -86,6 +86,13 @@ const App: React.FC = () => {
         setPastParlays([]);
         return;
       }
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        currentUser.id
+      );
+      if (!isUuid) {
+        setPastParlays([]);
+        return;
+      }
       const { data, error } = await supabase
         .from('parlays')
         .select('id, created_at, prediction_result')
@@ -218,7 +225,12 @@ const App: React.FC = () => {
       };
       setPastParlays(prev => [newParlay, ...prev]);
 
-      if (currentUser) {
+      const isUuid = currentUser
+        ? /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+            currentUser.id
+          )
+        : false;
+      if (currentUser && isUuid) {
         const storedResult = { ...fullResult, imagePreviewUrl: null };
         const { error: insertError } = await supabase
           .from('parlays')
@@ -255,6 +267,13 @@ const App: React.FC = () => {
       return;
     }
     if (!currentUser) {
+      setPastParlays([]);
+      return;
+    }
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      currentUser.id
+    );
+    if (!isUuid) {
       setPastParlays([]);
       return;
     }
