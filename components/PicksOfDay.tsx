@@ -37,29 +37,10 @@ export const PicksOfDay: React.FC = () => {
   const [topPropsByLeague, setTopPropsByLeague] = useState<Record<string, DailyProp[]>>({});
   const [activeParlaySize, setActiveParlaySize] = useState<2 | 3 | 4 | 6 | null>(null);
 
-  const combinedTopProps = useMemo(() => {
-    const allProps = Object.entries(topPropsByLeague).flatMap(([leagueId, props]) =>
-      props.map((prop) => ({ ...prop, leagueId }))
-    );
-    const deduped = new Map<string, (DailyProp & { leagueId: string })>();
-    allProps.forEach((prop) => {
-      const key = `${prop.leagueId}|${prop.player}|${prop.statLabel}|${prop.line}|${prop.side ?? ''}`;
-      const existing = deduped.get(key);
-      const existingScore = existing?.confidence ?? 0;
-      const nextScore = prop.confidence ?? 0;
-      if (!existing || nextScore > existingScore) {
-        deduped.set(key, prop);
-      }
-    });
-    return Array.from(deduped.values()).sort(
-      (a, b) => (b.confidence ?? 0) - (a.confidence ?? 0)
-    );
-  }, [topPropsByLeague]);
-
   const parlayProps = useMemo(() => {
     if (!activeParlaySize) return [];
-    return combinedTopProps.slice(0, activeParlaySize);
-  }, [activeParlaySize, combinedTopProps]);
+    return (topPropsByLeague[activeTab.id] || []).slice(0, activeParlaySize);
+  }, [activeParlaySize, activeTab.id, topPropsByLeague]);
 
   return (
     <Card>
@@ -116,7 +97,7 @@ export const PicksOfDay: React.FC = () => {
         <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-5">
           <h4 className="text-lg font-semibold text-purple-300">Parlay Builder</h4>
           <p className="text-sm text-gray-400 mt-2">
-            Auto-build parlays from the best picks across all leagues.
+            Auto-build parlays from the best picks in {activeTab.label}.
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-gray-300">
             <button
@@ -156,7 +137,7 @@ export const PicksOfDay: React.FC = () => {
             <div className="mt-5 rounded-lg border border-purple-500/30 bg-black/50 p-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-purple-200">
-                  {activeParlaySize}-Leg Premade Parlay (All Leagues)
+                  {activeParlaySize}-Leg Premade Parlay ({activeTab.label})
                 </p>
                 <button
                   type="button"
