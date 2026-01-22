@@ -218,7 +218,10 @@ export const DailyProps: React.FC<DailyPropsProps> = ({ leagueId, leagueLabel, o
         if (
           message.includes('429') ||
           message.toLowerCase().includes('quota') ||
-          message.toLowerCase().includes('not json')
+          message.toLowerCase().includes('not json') ||
+          message.includes('403') ||
+          message.toLowerCase().includes('permission') ||
+          message.toLowerCase().includes('suspended')
         ) {
           setHasTechnicalIssue(true);
         } else {

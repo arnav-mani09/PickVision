@@ -83,90 +83,104 @@ export const PicksOfDay: React.FC = () => {
           </div>
         </div>
 
-        <DailyProps
-          key={activeTab.id}
-          leagueId={activeTab.id}
-          leagueLabel={activeTab.label}
-          onPropsLoaded={(props) =>
-            setTopPropsByLeague((prev) => ({
-              ...prev,
-              [activeTab.id]: props,
-            }))
-          }
-        />
-        <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-5">
-          <h4 className="text-lg font-semibold text-purple-300">Parlay Builder</h4>
-          <p className="text-sm text-gray-400 mt-2">
-            Auto-build parlays from the best picks in {activeTab.label}.
-          </p>
-          <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-gray-300">
-            <button
-              type="button"
-              onClick={() => setActiveParlaySize(6)}
-              className="rounded-lg border border-gray-700 bg-black/40 p-3 text-left transition hover:border-purple-500/60 hover:bg-purple-500/10"
-            >
-              <p className="font-semibold text-white">6-Man Flex</p>
-              <p className="text-xs text-gray-400 mt-1">Balanced risk build</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveParlaySize(2)}
-              className="rounded-lg border border-gray-700 bg-black/40 p-3 text-left transition hover:border-purple-500/60 hover:bg-purple-500/10"
-            >
-              <p className="font-semibold text-white">2-Man Power</p>
-              <p className="text-xs text-gray-400 mt-1">High conviction plays</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveParlaySize(4)}
-              className="rounded-lg border border-gray-700 bg-black/40 p-3 text-left transition hover:border-purple-500/60 hover:bg-purple-500/10"
-            >
-              <p className="font-semibold text-white">4-Man Flex</p>
-              <p className="text-xs text-gray-400 mt-1">Mid-range combos</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveParlaySize(3)}
-              className="rounded-lg border border-gray-700 bg-black/40 p-3 text-left transition hover:border-purple-500/60 hover:bg-purple-500/10"
-            >
-              <p className="font-semibold text-white">3-Man Power</p>
-              <p className="text-xs text-gray-400 mt-1">Aggressive odds</p>
-            </button>
-          </div>
-          {activeParlaySize && (
-            <div className="mt-5 rounded-lg border border-purple-500/30 bg-black/50 p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-purple-200">
-                  {activeParlaySize}-Leg Premade Parlay ({activeTab.label})
-                </p>
+        {activeTab.id === 'nba' ? (
+          <>
+            <DailyProps
+              key={activeTab.id}
+              leagueId={activeTab.id}
+              leagueLabel={activeTab.label}
+              onPropsLoaded={(props) =>
+                setTopPropsByLeague((prev) => ({
+                  ...prev,
+                  [activeTab.id]: props,
+                }))
+              }
+            />
+            <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-5">
+              <h4 className="text-lg font-semibold text-purple-300">Parlay Builder</h4>
+              <p className="text-sm text-gray-400 mt-2">
+                Auto-build parlays from the best picks in {activeTab.label}.
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-gray-300">
                 <button
                   type="button"
-                  onClick={() => setActiveParlaySize(null)}
-                  className="text-xs text-purple-300 hover:text-purple-200"
+                  onClick={() => setActiveParlaySize(6)}
+                  className="rounded-lg border border-gray-700 bg-black/40 p-3 text-left transition hover:border-purple-500/60 hover:bg-purple-500/10"
                 >
-                  Clear
+                  <p className="font-semibold text-white">6-Man Flex</p>
+                  <p className="text-xs text-gray-400 mt-1">Balanced risk build</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveParlaySize(2)}
+                  className="rounded-lg border border-gray-700 bg-black/40 p-3 text-left transition hover:border-purple-500/60 hover:bg-purple-500/10"
+                >
+                  <p className="font-semibold text-white">2-Man Power</p>
+                  <p className="text-xs text-gray-400 mt-1">High conviction plays</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveParlaySize(4)}
+                  className="rounded-lg border border-gray-700 bg-black/40 p-3 text-left transition hover:border-purple-500/60 hover:bg-purple-500/10"
+                >
+                  <p className="font-semibold text-white">4-Man Flex</p>
+                  <p className="text-xs text-gray-400 mt-1">Mid-range combos</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveParlaySize(3)}
+                  className="rounded-lg border border-gray-700 bg-black/40 p-3 text-left transition hover:border-purple-500/60 hover:bg-purple-500/10"
+                >
+                  <p className="font-semibold text-white">3-Man Power</p>
+                  <p className="text-xs text-gray-400 mt-1">Aggressive odds</p>
                 </button>
               </div>
-              {parlayProps.length === 0 ? (
-                <p className="mt-3 text-xs text-gray-400">Loading top props…</p>
-              ) : (
-                <div className="mt-3 space-y-2 text-sm text-gray-200">
-                  {parlayProps.map((prop) => (
-                    <div
-                      key={`parlay-${prop.id}`}
-                      className="rounded-md border border-gray-700/60 bg-gray-900/60 px-3 py-2"
+              {activeParlaySize && (
+                <div className="mt-5 rounded-lg border border-purple-500/30 bg-black/50 p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-purple-200">
+                      {activeParlaySize}-Leg Premade Parlay ({activeTab.label})
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setActiveParlaySize(null)}
+                      className="text-xs text-purple-300 hover:text-purple-200"
                     >
-                      <p className="font-semibold text-white">{prop.player}</p>
-                      <p className="text-xs text-gray-300">
-                        {prop.statLabel} • {prop.side} • {prop.line}
-                      </p>
+                      Clear
+                    </button>
+                  </div>
+                  {parlayProps.length === 0 ? (
+                    <p className="mt-3 text-xs text-gray-400">Loading top props…</p>
+                  ) : (
+                    <div className="mt-3 space-y-2 text-sm text-gray-200">
+                      {parlayProps.map((prop) => (
+                        <div
+                          key={`parlay-${prop.id}`}
+                          className="rounded-md border border-gray-700/60 bg-gray-900/60 px-3 py-2"
+                        >
+                          <p className="font-semibold text-white">{prop.player}</p>
+                          <p className="text-xs text-gray-300">
+                            {prop.statLabel} • {prop.side} • {prop.line}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          <div className="rounded-2xl border border-purple-500/30 bg-black/70 p-8 text-center shadow-[0_0_30px_rgba(168,85,247,0.35)]">
+            <p className="text-xs uppercase tracking-[0.35em] text-purple-200/70">Coming Soon</p>
+            <h4 className="mt-3 text-xl font-semibold text-white">
+              {activeTab.label} Picks Are On The Way
+            </h4>
+            <p className="mt-2 text-sm text-gray-400">
+              We&apos;ll bring these leagues back once the next update lands.
+            </p>
+          </div>
+        )}
       </div>
     </Card>
   );
