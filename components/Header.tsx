@@ -13,9 +13,8 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ title, subtitle, user, onLogout }) => {
   return (
     <header className="w-full max-w-4xl py-6 text-center">
-       {user && onLogout && (
-        <div className="flex justify-between items-center mb-4 px-2">
-          <span className="text-sm text-gray-400 truncate">Welcome, {user.email}</span>
+      {onLogout && (
+        <div className="flex justify-end items-center mb-4 px-2">
           <Button onClick={onLogout} variant="secondary" size="sm">Sign Out</Button>
         </div>
       )}

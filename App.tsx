@@ -381,7 +381,13 @@ const App: React.FC = () => {
           {error && (
             <div className="bg-red-700 border border-red-900 text-white px-4 py-3 rounded relative shadow-lg" role="alert">
               <strong className="font-bold">Error: </strong>
-              <span className="block sm:inline">{error}</span>
+              <span className="block sm:inline">
+                {error.toLowerCase().includes('quota') ||
+                error.includes('429') ||
+                error.toLowerCase().includes('resource_exhausted')
+                  ? 'Sorry, try again later.'
+                  : error}
+              </span>
               <button onClick={() => setError(null)} className="absolute top-0 bottom-0 right-0 px-4 py-3 text-red-100 hover:text-white">
                 <span aria-hidden="true">&times;</span><span className="sr-only">Close</span>
               </button>
