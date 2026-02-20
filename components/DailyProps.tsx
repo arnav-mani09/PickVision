@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
-import { getDailyPropSuggestions } from '../services/geminiService';
+import { fetchDailyPicks } from '../services/standingsService';
 
 export type DailyProp = {
   id: string;
@@ -168,7 +168,8 @@ export const DailyProps: React.FC<DailyPropsProps> = ({ leagueId, leagueLabel, o
           }
         }
 
-        const aiProps = await getDailyPropSuggestions(dateLabel, 14, leagueLabel);
+        const response = await fetchDailyPicks(leagueId, dateLabel);
+        const aiProps = Array.isArray(response?.picks) ? response.picks : [];
 
         const deduped = new Map<string, DailyProp>();
         aiProps.forEach((prop, index) => {

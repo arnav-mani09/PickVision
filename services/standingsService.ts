@@ -75,3 +75,18 @@ export const fetchNbaPlayerPropsByGame = async (
 
   return data;
 };
+
+export const fetchDailyPicks = async (league: string, date: string) => {
+  const headers = await getFunctionAuthHeaders();
+  const { data, error } = await supabase.functions.invoke('generate-daily-picks', {
+    method: 'POST',
+    body: { league, date },
+    headers,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
