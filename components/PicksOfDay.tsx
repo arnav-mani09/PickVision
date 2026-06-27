@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Card } from './ui/Card';
 import { DailyProps, type DailyProp } from './DailyProps';
+import { WorldCupPicks } from './WorldCupPicks';
 
 const sportsTabs = [
   {
@@ -24,16 +25,20 @@ const sportsTabs = [
     blurb: 'Pitching splits and batter prop watchlists.',
   },
   {
-    id: 'nhl',
-    label: 'NHL',
-    image:
-      'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1200&q=80',
-    blurb: 'Line combos, goalie trends, and shot volume props.',
+    id: 'soccer',
+    label: 'Soccer',
+    image: '/soccer.jpg',
+    blurb: 'World Cup coverage and global match-day props.',
   },
+];
+
+const soccerSubTabs = [
+  { id: 'world-cup', label: 'World Cup' },
 ];
 
 export const PicksOfDay: React.FC = () => {
   const [activeTab, setActiveTab] = useState(sportsTabs[0]);
+  const [activeSoccerSubTab, setActiveSoccerSubTab] = useState(soccerSubTabs[0]);
   const [topPropsByLeague, setTopPropsByLeague] = useState<Record<string, DailyProp[]>>({});
   const [activeParlaySize, setActiveParlaySize] = useState<2 | 3 | 4 | 6 | null>(null);
 
@@ -69,9 +74,9 @@ export const PicksOfDay: React.FC = () => {
         </div>
 
         <div
-          className="relative h-40 rounded-xl overflow-hidden border border-gray-800"
+          className="relative aspect-[64/27] rounded-xl overflow-hidden border border-gray-800"
           style={{
-            backgroundImage: `url(${activeTab.image})`,
+            backgroundImage: activeTab.image ? `url(${activeTab.image})` : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -170,6 +175,26 @@ export const PicksOfDay: React.FC = () => {
               )}
             </div>
           </>
+        ) : activeTab.id === 'soccer' ? (
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              {soccerSubTabs.map((subTab) => (
+                <button
+                  key={subTab.id}
+                  type="button"
+                  onClick={() => setActiveSoccerSubTab(subTab)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                    activeSoccerSubTab.id === subTab.id
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-gray-800/80 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  {subTab.label}
+                </button>
+              ))}
+            </div>
+            <WorldCupPicks />
+          </div>
         ) : (
           <div className="rounded-2xl border border-purple-500/30 bg-black/70 p-8 text-center shadow-[0_0_30px_rgba(168,85,247,0.35)]">
             <p className="text-xs uppercase tracking-[0.35em] text-purple-200/70">Coming Soon</p>

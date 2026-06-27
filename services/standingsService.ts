@@ -90,3 +90,18 @@ export const fetchDailyPicks = async (league: string, date: string) => {
 
   return data;
 };
+
+export const fetchWorldCupPicks = async (date: string) => {
+  const headers = await getFunctionAuthHeaders();
+  const { data, error } = await supabase.functions.invoke('generate-world-cup-picks', {
+    method: 'POST',
+    body: { date },
+    headers,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};

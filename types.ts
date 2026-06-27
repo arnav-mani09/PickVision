@@ -76,3 +76,24 @@ export interface User {
   id: string;
   email: string;
 }
+
+export interface WorldCupPick {
+  player: string;
+  statLabel: string;
+  side: 'Over' | 'Under';
+  line: string;
+  reason: string;
+}
+
+export interface WorldCupGame {
+  id: string;
+  kickoff: string; // ISO datetime
+  homeTeam: string;
+  awayTeam: string;
+  homeCountryCode: string; // ISO 3166-1 alpha-2, e.g. "BR"
+  awayCountryCode: string;
+  predictedWinner: string;
+  confidence: number;
+  reasoning: string;
+  topPicks: WorldCupPick[];
+}

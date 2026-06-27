@@ -155,10 +155,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                     "/mlb.png",
                 },
                 {
-                  title: "NHL",
-                  link: "https://www.espn.com/nhl/",
-                  image:
-                    "/nhl.png",
+                  title: "Soccer",
+                  link: "https://www.espn.com/soccer/",
+                  image: "",
                 },
               ].map((item) => (
                 <a
@@ -170,11 +169,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                 >
                   <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/70 to-black/90" />
                   <div className="relative h-full flex flex-col items-center justify-center gap-3">
-                    <img
-                      src={item.image}
-                      alt={`${item.title} logo`}
-                      className="h-16 w-auto drop-shadow-[0_0_12px_rgba(255,255,255,0.35)]"
-                    />
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={`${item.title} logo`}
+                        className="h-16 w-auto drop-shadow-[0_0_12px_rgba(255,255,255,0.35)]"
+                      />
+                    ) : (
+                      <div className="h-16 w-16 rounded-full bg-white/10 flex items-center justify-center text-2xl">
+                        ⚽
+                      </div>
+                    )}
                     <div className="text-center">
                       <span className="text-lg font-semibold text-white">{item.title}</span>
                       <p className="text-xs text-gray-300">Latest headlines</p>
