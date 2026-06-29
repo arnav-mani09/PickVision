@@ -152,6 +152,25 @@ For EACH match, provide:
 Output JSON only: {"predictions":[{"gameId":"...","predictedWinner":"...","confidence":0.0,"reasoning":"...","homeOffenseAboveAverage":true,"awayOffenseAboveAverage":false,"homeDefenseBelowAverage":false,"awayDefenseBelowAverage":true,"homeFormWins":3,"awayFormWins":2,"topPicks":[{"player":"...","statLabel":"...","side":"Over","line":"0.5","reason":"...","last5Hits":3}]}]}
 `;
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Gemini's "high demand" 503s observed in production reliably clear within a few seconds — retry
+// the whole call+parse step rather than just the HTTP request, since a malformed/empty parse is
+// just as likely to be a transient blip as an outright HTTP error.
+const RETRY_DELAYS_MS = [1500, 3000];
+const withRetry = async <T>(fn: () => Promise<T>): Promise<T> => {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt < RETRY_DELAYS_MS.length) await sleep(RETRY_DELAYS_MS[attempt]);
+    }
+  }
+  throw lastError;
+};
+
 const callGemini = async (geminiKey: string, prompt: string): Promise<string> => {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
@@ -206,8 +225,10 @@ Deno.serve(async (req) => {
     }
 
     const endDate = addDays(date, WINDOW_DAYS);
-    const scheduleRaw = await callGemini(geminiKey, buildSchedulePrompt(date, endDate));
-    const scheduleParsed = extractJson<{ matches: Omit<ScheduleMatch, "gameId">[] }>(scheduleRaw);
+    const scheduleParsed = await withRetry(async () => {
+      const scheduleRaw = await callGemini(geminiKey, buildSchedulePrompt(date, endDate));
+      return extractJson<{ matches: Omit<ScheduleMatch, "gameId">[] }>(scheduleRaw);
+    });
     const isoCodePattern = /^[A-Za-z]{2}$/;
     const matches: ScheduleMatch[] = (scheduleParsed.matches ?? [])
       .filter(
@@ -248,8 +269,10 @@ Deno.serve(async (req) => {
 
     let newGames: WorldCupGame[] = [];
     if (uncachedMatches.length > 0) {
-      const predictionRaw = await callGemini(geminiKey, buildPredictionPrompt(uncachedMatches));
-      const predictionParsed = extractJson<{ predictions: Prediction[] }>(predictionRaw);
+      const predictionParsed = await withRetry(async () => {
+        const predictionRaw = await callGemini(geminiKey, buildPredictionPrompt(uncachedMatches));
+        return extractJson<{ predictions: Prediction[] }>(predictionRaw);
+      });
       const predictionsById = new Map(
         (predictionParsed.predictions ?? []).map((p) => [p.gameId, p])
       );

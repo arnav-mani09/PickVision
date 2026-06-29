@@ -25,6 +25,45 @@ type TeamStatFlags = Record<string, { offenseAboveAverage: boolean; defenseBelow
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Gemini's "high demand" 503s observed in production reliably clear within a few seconds — retry
+// the whole call+parse step rather than just the HTTP request, since a malformed/empty parse is
+// just as likely to be a transient blip as an outright HTTP error.
+const RETRY_DELAYS_MS = [1500, 3000];
+const withRetry = async <T>(fn: () => Promise<T>): Promise<T> => {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt < RETRY_DELAYS_MS.length) await sleep(RETRY_DELAYS_MS[attempt]);
+    }
+  }
+  throw lastError;
+};
+
+const callGemini = async (geminiKey: string, prompt: string): Promise<string> => {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        tools: [{ googleSearch: {} }],
+      }),
+    }
+  );
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini request failed (${response.status}): ${errorText}`);
+  }
+  const json = await response.json();
+  return json?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+};
+
 const scorePick = (last5Hits?: number): number => {
   if (last5Hits === undefined || Number.isNaN(last5Hits)) return 0.5;
   return clamp(0.5 + (last5Hits - 2.5) * PICK_HIT_WEIGHT, PICK_CONFIDENCE_MIN, PICK_CONFIDENCE_MAX);
@@ -175,29 +214,10 @@ Deno.serve(async (req) => {
     const statFlags = league === "nba" ? await fetchNbaTeamStatFlags() : null;
     const prompt = buildPrompt(leagueLabel, date, 14, buildStatContext(statFlags));
 
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          tools: [{ googleSearch: {} }],
-        }),
-      }
-    );
-
-    if (!geminiResponse.ok) {
-      const errorText = await geminiResponse.text();
-      return new Response(JSON.stringify({ error: errorText }), {
-        status: geminiResponse.status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const geminiJson = await geminiResponse.json();
-    const rawText = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-    const props = parseGeminiJson(rawText);
+    const props = await withRetry(async () => {
+      const rawText = await callGemini(geminiKey, prompt);
+      return parseGeminiJson(rawText);
+    });
 
     await fetch(`${supabaseUrl}/rest/v1/daily_picks`, {
       method: "POST",
