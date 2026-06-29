@@ -5,6 +5,16 @@ const corsHeaders = {
 
 const WINDOW_DAYS = 3;
 
+// Weight constants for the deterministic scoring layer — tune these once we have real outcome data.
+const PICK_HIT_WEIGHT = 0.08; // per-hit nudge away from the 2.5/5 baseline, for player props
+const PICK_CONFIDENCE_MIN = 0.3;
+const PICK_CONFIDENCE_MAX = 0.93;
+const TEAM_FACTOR_WEIGHT = 0.12; // per-point-of-diff nudge for match confidence
+const TEAM_CONFIDENCE_MIN = 0.5;
+const TEAM_CONFIDENCE_MAX = 0.95;
+const RULE_BLEND = 0.7; // how much of match confidence comes from our rules vs Gemini's own number
+const GEMINI_BLEND = 1 - RULE_BLEND;
+
 type ScheduleMatch = {
   gameId: string;
   kickoff: string;
@@ -20,6 +30,19 @@ type WorldCupPick = {
   side: "Over" | "Under";
   line: string;
   reason: string;
+  last5Hits?: number;
+};
+
+type ScoredWorldCupPick = WorldCupPick & { confidence: number };
+
+type PredictionFactors = {
+  homeOffenseAboveAverage?: boolean;
+  awayOffenseAboveAverage?: boolean;
+  homeDefenseBelowAverage?: boolean;
+  awayDefenseBelowAverage?: boolean;
+  homeFormWins?: number;
+  awayFormWins?: number;
+  geminiConfidence?: number;
 };
 
 type Prediction = {
@@ -28,9 +51,52 @@ type Prediction = {
   confidence: number;
   reasoning: string;
   topPicks: WorldCupPick[];
+  homeOffenseAboveAverage?: boolean;
+  awayOffenseAboveAverage?: boolean;
+  homeDefenseBelowAverage?: boolean;
+  awayDefenseBelowAverage?: boolean;
+  homeFormWins?: number;
+  awayFormWins?: number;
 };
 
-type WorldCupGame = ScheduleMatch & Omit<Prediction, "gameId">;
+type WorldCupGame = ScheduleMatch &
+  Omit<Prediction, "gameId" | "topPicks"> & {
+    topPicks: ScoredWorldCupPick[];
+    factors?: PredictionFactors;
+  };
+
+const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
+
+const scorePick = (last5Hits?: number): number => {
+  if (last5Hits === undefined || Number.isNaN(last5Hits)) return 0.5;
+  return clamp(0.5 + (last5Hits - 2.5) * PICK_HIT_WEIGHT, PICK_CONFIDENCE_MIN, PICK_CONFIDENCE_MAX);
+};
+
+const factorScore = (
+  offenseAboveAverage: boolean | undefined,
+  opponentDefenseBelowAverage: boolean | undefined,
+  formWins: number | undefined
+): number => {
+  return (
+    (offenseAboveAverage ? 1 : 0) +
+    (opponentDefenseBelowAverage ? 1 : 0) +
+    (formWins !== undefined ? formWins / 5 : 0.5)
+  );
+};
+
+const scoreMatch = (prediction: Prediction, homeTeam: string, awayTeam: string): number => {
+  const homeScore = factorScore(prediction.homeOffenseAboveAverage, prediction.awayDefenseBelowAverage, prediction.homeFormWins);
+  const awayScore = factorScore(prediction.awayOffenseAboveAverage, prediction.homeDefenseBelowAverage, prediction.awayFormWins);
+
+  let diff = 0;
+  if (prediction.predictedWinner === homeTeam) diff = homeScore - awayScore;
+  else if (prediction.predictedWinner === awayTeam) diff = awayScore - homeScore;
+  // Draw or unrecognized winner string: diff stays 0, rule confidence falls back to 0.5.
+
+  const ruleConfidence = clamp(0.5 + diff * TEAM_FACTOR_WEIGHT, TEAM_CONFIDENCE_MIN, TEAM_CONFIDENCE_MAX);
+  const geminiConfidence = clamp(Number(prediction.confidence ?? 0.5), 0, 1);
+  return clamp(ruleConfidence * RULE_BLEND + geminiConfidence * GEMINI_BLEND, TEAM_CONFIDENCE_MIN, TEAM_CONFIDENCE_MAX);
+};
 
 const addDays = (dateStr: string, days: number): string => {
   const d = new Date(`${dateStr}T00:00:00Z`);
@@ -76,11 +142,14 @@ ${matches.map((m, i) => `${i + 1}. ${m.homeTeam} vs ${m.awayTeam} (kickoff: ${m.
 For EACH match, provide:
 - gameId: must exactly match the gameId given for that match above.
 - predictedWinner: the full team name predicted to win, or "Draw" if you genuinely expect a draw.
-- confidence: numeric 0-1.
+- confidence: numeric 0-1 (your own holistic read).
 - reasoning: 2-4 concise sentences covering the key factors (form, injuries, head-to-head, home advantage).
-- topPicks: EXACTLY 3 player prop picks for this match, each with: player, statLabel (one of: Goals, Shots on Target, Assists, Saves, Tackles, Cards), side (Over/Under), line (must end in .5), reason (max 16 words).
+- homeOffenseAboveAverage / awayOffenseAboveAverage: boolean — is this team's goal-scoring output above the World Cup field average?
+- homeDefenseBelowAverage / awayDefenseBelowAverage: boolean — is this team's defense WEAKER (more goals conceded) than the World Cup field average?
+- homeFormWins / awayFormWins: integer 0-5 — how many of this team's last 5 competitive matches were wins?
+- topPicks: EXACTLY 3 player prop picks for this match, each with: player, statLabel (one of: Goals, Shots on Target, Assists, Saves, Tackles, Cards), side (Over/Under), line (must end in .5), reason (max 16 words), last5Hits (integer 0-5 — in how many of this player's last 5 relevant games would this exact side/line have hit?).
 
-Output JSON only: {"predictions":[{"gameId":"...","predictedWinner":"...","confidence":0.0,"reasoning":"...","topPicks":[{"player":"...","statLabel":"...","side":"Over","line":"0.5","reason":"..."}]}]}
+Output JSON only: {"predictions":[{"gameId":"...","predictedWinner":"...","confidence":0.0,"reasoning":"...","homeOffenseAboveAverage":true,"awayOffenseAboveAverage":false,"homeDefenseBelowAverage":false,"awayDefenseBelowAverage":true,"homeFormWins":3,"awayFormWins":2,"topPicks":[{"player":"...","statLabel":"...","side":"Over","line":"0.5","reason":"...","last5Hits":3}]}]}
 `;
 
 const callGemini = async (geminiKey: string, prompt: string): Promise<string> => {
@@ -139,10 +208,22 @@ Deno.serve(async (req) => {
     const endDate = addDays(date, WINDOW_DAYS);
     const scheduleRaw = await callGemini(geminiKey, buildSchedulePrompt(date, endDate));
     const scheduleParsed = extractJson<{ matches: Omit<ScheduleMatch, "gameId">[] }>(scheduleRaw);
-    const matches: ScheduleMatch[] = (scheduleParsed.matches ?? []).map((m) => ({
-      ...m,
-      gameId: toGameId(m.homeCountryCode, m.awayCountryCode, m.kickoff),
-    }));
+    const isoCodePattern = /^[A-Za-z]{2}$/;
+    const matches: ScheduleMatch[] = (scheduleParsed.matches ?? [])
+      .filter(
+        // Excludes knockout-stage placeholders ("TBD" teams, "N/A" codes) where the bracket
+        // hasn't resolved yet, not just malformed responses — both fail the 2-letter ISO check.
+        (m) =>
+          typeof m?.kickoff === "string" &&
+          typeof m?.homeTeam === "string" &&
+          typeof m?.awayTeam === "string" &&
+          isoCodePattern.test(m?.homeCountryCode ?? "") &&
+          isoCodePattern.test(m?.awayCountryCode ?? "")
+      )
+      .map((m) => ({
+        ...m,
+        gameId: toGameId(m.homeCountryCode, m.awayCountryCode, m.kickoff),
+      }));
 
     if (matches.length === 0) {
       return new Response(JSON.stringify({ games: [] }), {
@@ -174,15 +255,28 @@ Deno.serve(async (req) => {
       );
 
       newGames = uncachedMatches
-        .map((match) => {
+        .map((match): WorldCupGame | null => {
           const prediction = predictionsById.get(match.gameId);
           if (!prediction) return null;
+          const scoredPicks: ScoredWorldCupPick[] = (prediction.topPicks ?? []).slice(0, 3).map((pick) => ({
+            ...pick,
+            confidence: scorePick(pick.last5Hits),
+          }));
           return {
             ...match,
             predictedWinner: prediction.predictedWinner,
-            confidence: Number(prediction.confidence ?? 0),
+            confidence: scoreMatch(prediction, match.homeTeam, match.awayTeam),
             reasoning: prediction.reasoning ?? "",
-            topPicks: (prediction.topPicks ?? []).slice(0, 3),
+            topPicks: scoredPicks,
+            factors: {
+              homeOffenseAboveAverage: prediction.homeOffenseAboveAverage,
+              awayOffenseAboveAverage: prediction.awayOffenseAboveAverage,
+              homeDefenseBelowAverage: prediction.homeDefenseBelowAverage,
+              awayDefenseBelowAverage: prediction.awayDefenseBelowAverage,
+              homeFormWins: prediction.homeFormWins,
+              awayFormWins: prediction.awayFormWins,
+              geminiConfidence: prediction.confidence,
+            },
           };
         })
         .filter((g): g is WorldCupGame => g !== null);
@@ -208,6 +302,7 @@ Deno.serve(async (req) => {
               confidence: g.confidence,
               reasoning: g.reasoning,
               top_picks: g.topPicks,
+              factors: g.factors,
             }))
           ),
         });

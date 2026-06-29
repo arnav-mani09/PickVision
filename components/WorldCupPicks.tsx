@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { fetchWorldCupPicks } from '../services/standingsService';
@@ -57,6 +57,7 @@ export const WorldCupPicks: React.FC = () => {
   const [hasTechnicalIssue, setHasTechnicalIssue] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const [now, setNow] = useState(() => Date.now());
+  const gamesRef = useRef<WorldCupGame[]>([]);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 5 * 60 * 1000);
@@ -75,8 +76,11 @@ export const WorldCupPicks: React.FC = () => {
   }, [games, now]);
 
   useEffect(() => {
-    const loadGames = async () => {
-      setIsLoading(true);
+    // `forceRefresh` skips the localStorage cache and hits the server directly — used by the
+    // periodic refresh below so a long-lived tab picks up newly-entered matches instead of just
+    // re-filtering the same stale snapshot as old matches age out of the visible window.
+    const loadGames = async (forceRefresh: boolean) => {
+      if (!forceRefresh) setIsLoading(true);
       setError(null);
       setHasTechnicalIssue(false);
 
@@ -84,25 +88,42 @@ export const WorldCupPicks: React.FC = () => {
       const cacheKey = `pickvision:world-cup-picks:${dateLabel}`;
 
       try {
-        const cached = localStorage.getItem(cacheKey);
-        if (cached) {
-          try {
-            const parsed = JSON.parse(cached) as { games: WorldCupGame[] };
-            if (Array.isArray(parsed.games) && parsed.games.length > 0) {
-              setGames(parsed.games);
-              setIsLoading(false);
-              return;
+        if (!forceRefresh) {
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) {
+            try {
+              const parsed = JSON.parse(cached) as { games: WorldCupGame[] };
+              if (Array.isArray(parsed.games) && parsed.games.length > 0) {
+                gamesRef.current = parsed.games;
+                setGames(parsed.games);
+                setIsLoading(false);
+                return;
+              }
+            } catch (_) {
+              // Ignore invalid cache.
             }
-          } catch (_) {
-            // Ignore invalid cache.
           }
         }
 
-        const response = await fetchWorldCupPicks(dateLabel);
-        const fetchedGames: WorldCupGame[] = Array.isArray(response?.games) ? response.games : [];
+        let response = await fetchWorldCupPicks(dateLabel);
+        let fetchedGames: WorldCupGame[] = Array.isArray(response?.games) ? response.games : [];
+
+        // Gemini's schedule search is occasionally flaky (observed: an empty/incomplete result that
+        // succeeds on retry) — a single bad response shouldn't read as "no matches." Retry once before
+        // trusting an empty result, and never let an empty refresh stomp on an already-good list.
+        if (fetchedGames.length === 0) {
+          if (forceRefresh && gamesRef.current.length > 0) return;
+          response = await fetchWorldCupPicks(dateLabel);
+          fetchedGames = Array.isArray(response?.games) ? response.games : [];
+        }
+        if (fetchedGames.length === 0 && forceRefresh && gamesRef.current.length > 0) return;
+
+        gamesRef.current = fetchedGames;
         setGames(fetchedGames);
         localStorage.setItem(cacheKey, JSON.stringify({ games: fetchedGames }));
       } catch (fetchError) {
+        // A failed background refresh shouldn't blank out an already-populated list.
+        if (forceRefresh && gamesRef.current.length > 0) return;
         const message = fetchError instanceof Error ? fetchError.message : 'Failed to load matches.';
         if (
           message.includes('429') ||
@@ -121,7 +142,9 @@ export const WorldCupPicks: React.FC = () => {
       }
     };
 
-    loadGames();
+    loadGames(false);
+    const refreshInterval = setInterval(() => loadGames(true), 30 * 60 * 1000);
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const reveal = (gameId: string) => {
@@ -223,7 +246,14 @@ export const WorldCupPicks: React.FC = () => {
                     key={`${game.id}-pick-${index}`}
                     className="rounded-md border border-gray-700/60 bg-gray-900/60 px-3 py-2"
                   >
-                    <p className="font-semibold text-white text-sm">{pick.player}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-semibold text-white text-sm">{pick.player}</p>
+                      {pick.confidence !== undefined && (
+                        <span className="text-xs text-purple-300 whitespace-nowrap">
+                          {Math.round(pick.confidence * 100)}%
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-gray-300">
                       {pick.statLabel} • {pick.side} {pick.line}
                     </p>

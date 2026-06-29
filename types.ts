@@ -83,6 +83,7 @@ export interface WorldCupPick {
   side: 'Over' | 'Under';
   line: string;
   reason: string;
+  confidence?: number;
 }
 
 export interface WorldCupGame {
