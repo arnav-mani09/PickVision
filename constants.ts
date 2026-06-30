@@ -26,6 +26,4 @@ export const GEMINI_MODEL_VISION = 'gemini-2.5-flash'; // For image analysis (mu
 
 // Matches the publisher script already loaded in index.html.
 export const ADSENSE_CLIENT_ID = 'ca-pub-8586954616072867';
-// Create a "Display ad" unit in the AdSense dashboard and paste its slot ID here.
-// AdGate shows a placeholder box instead of a real ad until this is filled in.
-export const ADSENSE_AD_SLOT = '';
+export const ADSENSE_AD_SLOT = '5004370073';
