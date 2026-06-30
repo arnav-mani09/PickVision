@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
+import { AdGate } from './ui/AdGate';
 import { fetchDailyPicks } from '../services/standingsService';
 
 export type DailyProp = {
@@ -134,6 +135,8 @@ export const DailyProps: React.FC<DailyPropsProps> = ({ leagueId, leagueLabel, o
   const [hasTechnicalIssue, setHasTechnicalIssue] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [showGallery, setShowGallery] = useState(true);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [showAdGate, setShowAdGate] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const galleryRef = useRef<HTMLDivElement | null>(null);
   const scrollRaf = useRef<number | null>(null);
@@ -264,14 +267,16 @@ export const DailyProps: React.FC<DailyPropsProps> = ({ leagueId, leagueLabel, o
               <p className="text-xs text-gray-500 mt-2">Updated daily: {lastUpdated}</p>
             )}
           </div>
-          <Button
-            variant="primary"
-            size="sm"
-            className="w-full md:w-auto"
-            onClick={() => setShowGallery((prev) => !prev)}
-          >
-            {showGallery ? 'Hide Gallery' : 'Show Gallery'}
-          </Button>
+          {isUnlocked && (
+            <Button
+              variant="primary"
+              size="sm"
+              className="w-full md:w-auto"
+              onClick={() => setShowGallery((prev) => !prev)}
+            >
+              {showGallery ? 'Hide Gallery' : 'Show Gallery'}
+            </Button>
+          )}
         </div>
       </div>
       <div className="p-6">
@@ -291,7 +296,28 @@ export const DailyProps: React.FC<DailyPropsProps> = ({ leagueId, leagueLabel, o
         {!isLoading && !error && renderedProps.length === 0 && (
           <p className="text-gray-400 text-sm">No props available yet for today.</p>
         )}
-        {showGallery && (
+        {!isLoading && !error && renderedProps.length > 0 && !isUnlocked && (
+          showAdGate ? (
+            <AdGate
+              onContinue={() => {
+                setIsUnlocked(true);
+                setShowAdGate(false);
+              }}
+              continueLabel="today's picks"
+            />
+          ) : (
+            <div className="rounded-2xl border border-purple-500/30 bg-black/70 p-8 text-center shadow-[0_0_24px_rgba(168,85,247,0.25)]">
+              <p className="text-xs uppercase tracking-[0.35em] text-purple-200/70">Picks Ready</p>
+              <h4 className="mt-3 text-lg font-semibold text-white">
+                Today&apos;s Top {leagueLabel} Props Are In
+              </h4>
+              <Button onClick={() => setShowAdGate(true)} className="mt-4 w-full">
+                Unlock Today&apos;s Picks
+              </Button>
+            </div>
+          )
+        )}
+        {showGallery && isUnlocked && (
           <div className="rounded-2xl border border-purple-500/20 bg-gradient-to-br from-black/70 via-purple-950/20 to-black/80 p-4">
             <div className="flex items-center justify-between text-xs text-purple-200/70 uppercase tracking-[0.2em]">
               <span>Prop Gallery</span>

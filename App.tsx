@@ -10,6 +10,7 @@ import { extractParlayInfoFromImage, getEnhancedParlayPrediction } from './servi
 import type { User, PredictionResult, ExtractedImageResult, EditableParlayLeg, PastParlay } from './types';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { Button } from './components/ui/Button';
+import { AdGate } from './components/ui/AdGate';
 import { PastParlaysDisplay } from './components/PastParlaysDisplay';
 import { LandingPage } from "./LandingPage";
 import { TermsModal } from './components/TermsModal';
@@ -56,7 +57,9 @@ const App: React.FC = () => {
   
   const [isLoadingPrediction, setIsLoadingPrediction] = useState<boolean>(false);
   const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null);
-  
+  const [isPredictionUnlocked, setIsPredictionUnlocked] = useState<boolean>(false);
+  const [showPredictionAdGate, setShowPredictionAdGate] = useState<boolean>(false);
+
   const [error, setError] = useState<string | null>(null);
   
   const [pastParlays, setPastParlays] = useState<PastParlay[]>([]);
@@ -129,6 +132,8 @@ const App: React.FC = () => {
     setImageAnalysisResult(null);
     setCurrentParlayLegs(null);
     setPredictionResult(null);
+    setIsPredictionUnlocked(false);
+    setShowPredictionAdGate(false);
     setError(null);
     setIsLoadingImageProcessing(false);
     setIsLoadingPrediction(false);
@@ -206,6 +211,8 @@ const App: React.FC = () => {
     setIsLoadingPrediction(true);
     setError(null);
     setPredictionResult(null);
+    setIsPredictionUnlocked(false);
+    setShowPredictionAdGate(false);
 
     try {
       const result = await getEnhancedParlayPrediction(parlayDetailsForPrediction);
@@ -455,7 +462,27 @@ const App: React.FC = () => {
                     </div>
                   )}
 
-                  {predictionResult && !isLoadingPrediction && (
+                  {predictionResult && !isLoadingPrediction && !isPredictionUnlocked && (
+                    showPredictionAdGate ? (
+                      <AdGate
+                        onContinue={() => {
+                          setIsPredictionUnlocked(true);
+                          setShowPredictionAdGate(false);
+                        }}
+                        continueLabel="your parlay analysis"
+                      />
+                    ) : (
+                      <div className="rounded-2xl border border-purple-500/30 bg-black/70 p-8 text-center shadow-[0_0_24px_rgba(168,85,247,0.25)]">
+                        <p className="text-xs uppercase tracking-[0.35em] text-purple-200/70">Analysis Ready</p>
+                        <h4 className="mt-3 text-lg font-semibold text-white">Your AI Parlay Verdict Is In</h4>
+                        <Button onClick={() => setShowPredictionAdGate(true)} className="mt-4 w-full">
+                          Unlock Your Result
+                        </Button>
+                      </div>
+                    )
+                  )}
+
+                  {predictionResult && !isLoadingPrediction && isPredictionUnlocked && (
                     <PredictionDisplay result={predictionResult} />
                   )}
                   

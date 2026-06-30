@@ -23,3 +23,9 @@ export const STAT_CATEGORIES: StatCategory[] = [
 export const GEMINI_API_KEY_ERROR_MESSAGE = "API_KEY environment variable not set. AI features are disabled.";
 export const GEMINI_MODEL_TEXT = 'gemini-2.5-flash'; // For text generation
 export const GEMINI_MODEL_VISION = 'gemini-2.5-flash'; // For image analysis (multimodal)
+
+// Matches the publisher script already loaded in index.html.
+export const ADSENSE_CLIENT_ID = 'ca-pub-8586954616072867';
+// Create a "Display ad" unit in the AdSense dashboard and paste its slot ID here.
+// AdGate shows a placeholder box instead of a real ad until this is filled in.
+export const ADSENSE_AD_SLOT = '';

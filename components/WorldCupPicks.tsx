@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
+import { AdGate } from './ui/AdGate';
 import { fetchWorldCupPicks } from '../services/standingsService';
 import type { WorldCupGame } from '../types';
 
@@ -56,6 +57,7 @@ export const WorldCupPicks: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [hasTechnicalIssue, setHasTechnicalIssue] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
+  const [adGateIds, setAdGateIds] = useState<Set<string>>(new Set());
   const [now, setNow] = useState(() => Date.now());
   const gamesRef = useRef<WorldCupGame[]>([]);
 
@@ -147,7 +149,20 @@ export const WorldCupPicks: React.FC = () => {
     return () => clearInterval(refreshInterval);
   }, []);
 
+  const startReveal = (gameId: string) => {
+    setAdGateIds((prev) => {
+      const next = new Set(prev);
+      next.add(gameId);
+      return next;
+    });
+  };
+
   const reveal = (gameId: string) => {
+    setAdGateIds((prev) => {
+      const next = new Set(prev);
+      next.delete(gameId);
+      return next;
+    });
     setRevealedIds((prev) => {
       const next = new Set(prev);
       next.add(gameId);
@@ -193,6 +208,7 @@ export const WorldCupPicks: React.FC = () => {
     <div className="space-y-6">
       {visibleGames.map((game) => {
         const isRevealed = revealedIds.has(game.id);
+        const isShowingAdGate = adGateIds.has(game.id);
         return (
           <div
             key={game.id}
@@ -212,8 +228,10 @@ export const WorldCupPicks: React.FC = () => {
               </div>
             </div>
 
-            {!isRevealed ? (
-              <Button onClick={() => reveal(game.id)} className="w-full">
+            {!isRevealed && isShowingAdGate ? (
+              <AdGate onContinue={() => reveal(game.id)} continueLabel="predicted winner" />
+            ) : !isRevealed ? (
+              <Button onClick={() => startReveal(game.id)} className="w-full">
                 Reveal Predicted Winner
               </Button>
             ) : (
