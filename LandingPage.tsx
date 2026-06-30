@@ -3,6 +3,7 @@ import { Card } from "./components/ui/Card";
 import { Input } from "./components/ui/Input";
 import { Button } from "./components/ui/Button";
 import { LoadingSpinner } from "./components/ui/LoadingSpinner";
+import { AdBanner } from "./components/ui/AdBanner";
 import type { User } from "./types";
 interface LandingPageProps {
   onLoginSuccess: (user: User) => void;
@@ -269,7 +270,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
       </main>
 
       {showLogin && (
-        <div className="fixed bottom-6 right-6 w-[280px] animate-fadeIn z-[50]">
+        <div className="fixed top-24 right-6 w-[280px] animate-fadeIn z-[50]">
           <Card className="backdrop-blur-md bg-white/10 border border-white/20 shadow-lg p-6 rounded-xl">
             <h2 className="text-l font-semibold text-center text-white mb-4">
               {isLoginView ? "Sign In" : "Create Account"}
@@ -330,9 +331,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         </div>
       )}
 
-      <footer className="border-t border-white/10 px-6 py-6 text-center text-xs text-gray-500">
+      <footer className="border-t border-white/10 px-6 py-6 pb-24 text-center text-xs text-gray-500">
         © {new Date().getFullYear()} Pick Vision AI. For entertainment purposes only.
       </footer>
+
+      <div className="fixed bottom-0 left-0 right-0 z-40">
+        <AdBanner />
+      </div>
     </div>
   );
 };
