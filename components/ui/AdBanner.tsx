@@ -21,22 +21,18 @@ export const AdBanner: React.FC<AdBannerProps> = ({ className = '' }) => {
     }
   }, [hasRealAdUnit]);
 
+  if (!hasRealAdUnit) return null;
+
   return (
     <div className={`bg-black/95 border-t border-gray-800 max-h-[60px] overflow-hidden flex items-center justify-center ${className}`}>
-      {hasRealAdUnit ? (
-        <ins
-          className="adsbygoogle block"
-          style={{ display: 'block', width: '100%' }}
-          data-ad-client={ADSENSE_CLIENT_ID}
-          data-ad-slot={ADSENSE_AD_SLOT}
-          data-ad-format="auto"
-          data-full-width-responsive="true"
-        />
-      ) : (
-        <div className="flex items-center justify-center text-gray-500 text-xs py-4">
-          Ad placeholder
-        </div>
-      )}
+      <ins
+        className="adsbygoogle block"
+        style={{ display: 'block', width: '100%' }}
+        data-ad-client={ADSENSE_CLIENT_ID}
+        data-ad-slot={ADSENSE_AD_SLOT}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
     </div>
   );
 };

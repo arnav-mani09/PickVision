@@ -26,4 +26,5 @@ export const GEMINI_MODEL_VISION = 'gemini-2.5-flash'; // For image analysis (mu
 
 // Matches the publisher script already loaded in index.html.
 export const ADSENSE_CLIENT_ID = 'ca-pub-8586954616072867';
-export const ADSENSE_AD_SLOT = '5004370073';
+// Set back to '5004370073' once AdSense site status flips to "Ready".
+export const ADSENSE_AD_SLOT = '';

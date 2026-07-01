@@ -16,6 +16,13 @@ export const AdGate: React.FC<AdGateProps> = ({ onContinue, continueLabel = 'you
   const adRef = useRef<HTMLModElement>(null);
   const hasPushedAd = useRef(false);
 
+  // When no real ad unit is configured, skip the gate entirely.
+  useEffect(() => {
+    if (!ADSENSE_CLIENT_ID || !ADSENSE_AD_SLOT) {
+      onContinue();
+    }
+  }, []);
+
   useEffect(() => {
     if (secondsLeft <= 0) return;
     const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
