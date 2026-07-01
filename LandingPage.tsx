@@ -331,7 +331,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         </div>
       )}
 
-      <footer className="border-t border-white/10 px-6 py-6 pb-24 text-center text-xs text-gray-500">
+      <footer className="border-t border-white/10 px-6 py-6 pb-16 text-center text-xs text-gray-500">
         © {new Date().getFullYear()} Pick Vision AI. For entertainment purposes only.
       </footer>
 

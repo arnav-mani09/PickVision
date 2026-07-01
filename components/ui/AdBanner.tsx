@@ -22,7 +22,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({ className = '' }) => {
   }, [hasRealAdUnit]);
 
   return (
-    <div className={`bg-black/95 border-t border-gray-800 max-h-[90px] overflow-hidden flex items-center justify-center ${className}`}>
+    <div className={`bg-black/95 border-t border-gray-800 max-h-[60px] overflow-hidden flex items-center justify-center ${className}`}>
       {hasRealAdUnit ? (
         <ins
           className="adsbygoogle block"
