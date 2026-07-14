@@ -22,5 +22,4 @@ export const STAT_CATEGORIES: StatCategory[] = [
 
 // Matches the publisher script already loaded in index.html.
 export const ADSENSE_CLIENT_ID = 'ca-pub-8586954616072867';
-// Set back to '5004370073' once AdSense site status flips to "Ready".
-export const ADSENSE_AD_SLOT = '';
+export const ADSENSE_AD_SLOT = '5004370073';
