@@ -173,7 +173,7 @@ const withRetry = async <T>(fn: () => Promise<T>): Promise<T> => {
 
 const callGemini = async (geminiKey: string, prompt: string): Promise<string> => {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -20,10 +20,6 @@ export const STAT_CATEGORIES: StatCategory[] = [
   { id: '3pm', name: StatCategoryEnum.THREE_POINTERS_MADE, key: 'threepointersmade' },
 ];
 
-export const GEMINI_API_KEY_ERROR_MESSAGE = "API_KEY environment variable not set. AI features are disabled.";
-export const GEMINI_MODEL_TEXT = 'gemini-2.5-flash'; // For text generation
-export const GEMINI_MODEL_VISION = 'gemini-2.5-flash'; // For image analysis (multimodal)
-
 // Matches the publisher script already loaded in index.html.
 export const ADSENSE_CLIENT_ID = 'ca-pub-8586954616072867';
 // Set back to '5004370073' once AdSense site status flips to "Ready".
