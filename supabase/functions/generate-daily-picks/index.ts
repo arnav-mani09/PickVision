@@ -116,13 +116,34 @@ const buildStatContext = (flags: TeamStatFlags | null): string => {
   return `\nReal season stats for context (use these, don't re-derive via search):\n${lines.join("\n")}\n`;
 };
 
-const buildPrompt = (leagueLabel: string, dateLabel: string, maxProps: number, statContext: string) => `
+const STAT_LABELS_BY_LEAGUE: Record<string, string[]> = {
+  nba: ["Points", "Rebounds", "Assists", "PRA", "PR", "PA", "RA", "3PT Made", "Turnovers", "Blocks", "Steals"],
+  nfl: [
+    "Passing Yards",
+    "Passing TDs",
+    "Completions",
+    "Interceptions",
+    "Rushing Yards",
+    "Rushing TDs",
+    "Receiving Yards",
+    "Receptions",
+    "Receiving TDs",
+    "Longest Reception",
+    "Sacks",
+    "Tackles + Assists",
+    "Kicking Points",
+  ],
+};
+
+const buildPrompt = (league: string, leagueLabel: string, dateLabel: string, maxProps: number, statContext: string) => {
+  const statLabels = STAT_LABELS_BY_LEAGUE[league] ?? STAT_LABELS_BY_LEAGUE.nba;
+  return `
 You are an expert ${leagueLabel} props analyst. Use web search to find today's ${leagueLabel} games, available player props, and the strongest consensus or implied edges.
 Return the top ${maxProps} props with the absolute highest probability of hitting across all stat types.
 ${statContext}
 Rules:
 - Each item MUST include: player, statLabel, side (Over/Under), line (must end with .5), matchup (optional), confidence (0-1, your own holistic read), reason (1 short sentence, max 18 words), last5Hits (integer 0-5 — in how many of this player's last 5 relevant games would this exact side/line have hit?).
-- statLabel MUST be one of: Points, Rebounds, Assists, PRA, PR, PA, RA, 3PT Made, Turnovers, Blocks, Steals.
+- statLabel MUST be one of: ${statLabels.join(", ")}.
 - NEVER return "Player Prop" or "Prop".
 - Do NOT include parlays. Single props only.
 - Avoid duplicates (same player + statLabel + line).
@@ -131,6 +152,7 @@ Rules:
 
 Date context: ${dateLabel}
 `;
+};
 
 const parseGeminiJson = (rawText: string): DailyPropSuggestion[] => {
   let jsonStr = rawText.trim();
@@ -212,7 +234,7 @@ Deno.serve(async (req) => {
 
     const leagueLabel = league.toUpperCase();
     const statFlags = league === "nba" ? await fetchNbaTeamStatFlags() : null;
-    const prompt = buildPrompt(leagueLabel, date, 14, buildStatContext(statFlags));
+    const prompt = buildPrompt(league, leagueLabel, date, 14, buildStatContext(statFlags));
 
     const props = await withRetry(async () => {
       const rawText = await callGemini(geminiKey, prompt);

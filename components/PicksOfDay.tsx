@@ -1,21 +1,21 @@
 import React, { useMemo, useState } from 'react';
 import { Card } from './ui/Card';
 import { DailyProps, type DailyProp } from './DailyProps';
+import { NflPicks } from './NflPicks';
 import { WorldCupPicks } from './WorldCupPicks';
 
 const sportsTabs = [
+  {
+    id: 'nfl',
+    label: 'NFL',
+    image: '/nfl.jpg',
+    blurb: 'Game-day insights, usage trends, and injury watch.',
+  },
   {
     id: 'nba',
     label: 'NBA',
     image: '/season.webp',
     blurb: 'Daily props and matchup-driven angles for tonight.',
-  },
-  {
-    id: 'nfl',
-    label: 'NFL',
-    image:
-      'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80',
-    blurb: 'Game-day insights, usage trends, and injury watch.',
   },
   {
     id: 'mlb',
@@ -88,8 +88,14 @@ export const PicksOfDay: React.FC = () => {
           </div>
         </div>
 
-        {activeTab.id === 'nba' ? (
+        {activeTab.id === 'nba' || activeTab.id === 'nfl' ? (
           <>
+            {activeTab.id === 'nfl' && (
+              <div className="space-y-3">
+                <h4 className="text-lg font-semibold text-purple-300">This Week&apos;s Game Predictions</h4>
+                <NflPicks />
+              </div>
+            )}
             <DailyProps
               key={activeTab.id}
               leagueId={activeTab.id}

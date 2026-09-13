@@ -108,6 +108,21 @@ export const fetchDailyPicks = async (league: string, date: string) => {
   return data;
 };
 
+export const fetchNflGamePicks = async (date: string) => {
+  const headers = await getFunctionAuthHeaders();
+  const { data, error } = await supabase.functions.invoke('generate-nfl-picks', {
+    method: 'POST',
+    body: { date },
+    headers,
+  });
+
+  if (error) {
+    throw await unwrapFunctionError(error);
+  }
+
+  return data;
+};
+
 export const fetchWorldCupPicks = async (date: string) => {
   const headers = await getFunctionAuthHeaders();
   const { data, error } = await supabase.functions.invoke('generate-world-cup-picks', {

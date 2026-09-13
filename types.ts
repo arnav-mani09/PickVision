@@ -98,3 +98,23 @@ export interface WorldCupGame {
   reasoning: string;
   topPicks: WorldCupPick[];
 }
+
+export interface NflPick {
+  player: string;
+  statLabel: string;
+  side: 'Over' | 'Under';
+  line: string;
+  reason: string;
+  confidence?: number;
+}
+
+export interface NflGame {
+  id: string;
+  kickoff: string; // ISO datetime
+  homeTeam: string;
+  awayTeam: string;
+  predictedWinner: string;
+  confidence: number;
+  reasoning: string;
+  topPicks: NflPick[];
+}

@@ -79,8 +79,7 @@ const isInvalidPlayerName = (value?: string): boolean => {
   return normalized === 'scrambled' || normalized.includes('scrambled');
 };
 
-const getStatLabel = (value?: string): string => {
-  if (!value) return 'Prop';
+const getNbaStatLabel = (value: string): string => {
   const normalized = value.toLowerCase();
   if (normalized.includes('points + rebounds + assists') || normalized.includes('points+rebounds+assists')) {
     return 'PRA';
@@ -106,21 +105,55 @@ const getStatLabel = (value?: string): string => {
   return value;
 };
 
+const getNflStatLabel = (value: string): string => {
+  const normalized = value.toLowerCase();
+  if (normalized.includes('passing') && (normalized.includes('td') || normalized.includes('touchdown'))) {
+    return 'Passing TDs';
+  }
+  if (normalized.includes('rushing') && (normalized.includes('td') || normalized.includes('touchdown'))) {
+    return 'Rushing TDs';
+  }
+  if (normalized.includes('receiving') && (normalized.includes('td') || normalized.includes('touchdown'))) {
+    return 'Receiving TDs';
+  }
+  if (normalized.includes('passing') && normalized.includes('yard')) return 'Passing Yards';
+  if (normalized.includes('rushing') && normalized.includes('yard')) return 'Rushing Yards';
+  if (normalized.includes('longest reception')) return 'Longest Reception';
+  if (normalized.includes('receiving') && normalized.includes('yard')) return 'Receiving Yards';
+  if (normalized.includes('completions')) return 'Completions';
+  if (normalized.includes('interceptions')) return 'Interceptions';
+  if (normalized.includes('receptions')) return 'Receptions';
+  if (normalized.includes('sacks')) return 'Sacks';
+  if (normalized.includes('tackles')) return 'Tackles + Assists';
+  if (normalized.includes('kicking')) return 'Kicking Points';
+  return value;
+};
+
+const getStatLabel = (value: string | undefined, leagueId: string): string => {
+  if (!value) return 'Prop';
+  return leagueId === 'nfl' ? getNflStatLabel(value) : getNbaStatLabel(value);
+};
+
 const buildReasonFallback = (): string => 'Ranks near the top of today’s available prop market data.';
 
-const allowedStatLabels = new Set([
-  'Points',
-  'Rebounds',
-  'Assists',
-  'PRA',
-  'PR',
-  'PA',
-  'RA',
-  '3PT Made',
-  'Turnovers',
-  'Blocks',
-  'Steals',
-]);
+const allowedStatLabelsByLeague: Record<string, Set<string>> = {
+  nba: new Set(['Points', 'Rebounds', 'Assists', 'PRA', 'PR', 'PA', 'RA', '3PT Made', 'Turnovers', 'Blocks', 'Steals']),
+  nfl: new Set([
+    'Passing Yards',
+    'Passing TDs',
+    'Completions',
+    'Interceptions',
+    'Rushing Yards',
+    'Rushing TDs',
+    'Receiving Yards',
+    'Receptions',
+    'Receiving TDs',
+    'Longest Reception',
+    'Sacks',
+    'Tackles + Assists',
+    'Kicking Points',
+  ]),
+};
 
 type DailyPropsProps = {
   leagueId: string;
@@ -174,12 +207,13 @@ export const DailyProps: React.FC<DailyPropsProps> = ({ leagueId, leagueLabel, o
         const response = await fetchDailyPicks(leagueId, dateLabel);
         const aiProps = Array.isArray(response?.picks) ? response.picks : [];
 
+        const allowedStatLabels = allowedStatLabelsByLeague[leagueId] ?? allowedStatLabelsByLeague.nba;
         const deduped = new Map<string, DailyProp>();
         aiProps.forEach((prop, index) => {
           if (!prop.player || isInvalidPlayerName(prop.player)) return;
           if (!prop.side || !['Over', 'Under'].includes(prop.side)) return;
           const line = normalizeLineString(prop.line) ?? prop.line;
-          const statLabel = getStatLabel(prop.statLabel || 'Prop');
+          const statLabel = getStatLabel(prop.statLabel || 'Prop', leagueId);
           if (!allowedStatLabels.has(statLabel)) return;
           if (line === 'N/A' || line === '0.0') return;
           const key = [prop.player, statLabel, line].join('|');
