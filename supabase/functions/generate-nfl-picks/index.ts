@@ -7,6 +7,11 @@ const corsHeaders = {
 // so the whole slate shows up regardless of which day of the week this is called.
 const WINDOW_DAYS = 7;
 
+// Games can be cached days before kickoff. Rosters change (trades, waivers) in that window, so a
+// prediction generated once and never touched again can go stale with a wrong player/team for days.
+// Re-run predictions for any not-yet-played game whose cached row is older than this.
+const REFRESH_AFTER_MS = 24 * 60 * 60 * 1000;
+
 const NFL_STAT_LABELS = [
   "Passing Yards",
   "Passing TDs",
@@ -158,6 +163,14 @@ Rules:
 const buildPredictionPrompt = (matches: ScheduleMatch[]) => `
 You are an expert NFL analyst. Use web search to research current form, injuries, head-to-head history, and depth chart news for each of the following NFL games, then predict a winner for each.
 
+ROSTER ACCURACY IS CRITICAL: NFL rosters change constantly via trades, free agency, and waivers, and
+your training data can be out of date on this. Do NOT rely on prior/remembered knowledge of which
+team a player is on. Before naming any player in topPicks, use web search to confirm which team
+they are CURRENTLY on as of right now. Every player you list in a game's topPicks MUST currently be
+on the active roster of that game's homeTeam or awayTeam — if search results are unclear, conflicting,
+or you cannot confirm a player's current team, do not use that player; pick a different one you can
+verify instead.
+
 Games:
 ${matches.map((m, i) => `${i + 1}. ${m.homeTeam} vs ${m.awayTeam} (kickoff: ${m.kickoff}, gameId: ${m.gameId})`).join("\n")}
 
@@ -277,9 +290,17 @@ Deno.serve(async (req) => {
       }
     );
     const cachedRows: any[] = cacheResponse.ok ? await cacheResponse.json() : [];
-    const cachedById = new Map(cachedRows.map((row) => [row.game_id, row]));
+    const now = Date.now();
+    const isStale = (row: any): boolean => {
+      const kickoffTime = new Date(row.kickoff).getTime();
+      if (!Number.isNaN(kickoffTime) && kickoffTime <= now) return false; // already played — leave it
+      const createdAt = new Date(row.created_at).getTime();
+      return Number.isNaN(createdAt) || now - createdAt >= REFRESH_AFTER_MS;
+    };
+    const freshRows = cachedRows.filter((row) => !isStale(row));
+    const freshById = new Map(freshRows.map((row) => [row.game_id, row]));
 
-    const uncachedMatches = matches.filter((m) => !cachedById.has(m.gameId));
+    const uncachedMatches = matches.filter((m) => !freshById.has(m.gameId));
 
     let newGames: NflGame[] = [];
     if (uncachedMatches.length > 0) {
@@ -317,13 +338,15 @@ Deno.serve(async (req) => {
         .filter((g): g is NflGame => g !== null);
 
       if (newGames.length > 0) {
+        // merge-duplicates (not ignore-duplicates) so a stale row actually gets overwritten with the
+        // freshly re-researched prediction instead of silently keeping the old, possibly wrong one.
         await fetch(`${supabaseUrl}/rest/v1/nfl_picks?on_conflict=game_id`, {
           method: "POST",
           headers: {
             apikey: serviceRoleKey,
             Authorization: `Bearer ${serviceRoleKey}`,
             "Content-Type": "application/json",
-            Prefer: "resolution=ignore-duplicates,return=minimal",
+            Prefer: "resolution=merge-duplicates,return=minimal",
           },
           body: JSON.stringify(
             newGames.map((g) => ({
@@ -336,13 +359,14 @@ Deno.serve(async (req) => {
               reasoning: g.reasoning,
               top_picks: g.topPicks,
               factors: g.factors,
+              created_at: new Date().toISOString(),
             }))
           ),
         });
       }
     }
 
-    const cachedGames: NflGame[] = cachedRows.map((row) => ({
+    const cachedGames: NflGame[] = freshRows.map((row) => ({
       gameId: row.game_id,
       kickoff: row.kickoff,
       homeTeam: row.home_team,

@@ -5,6 +5,11 @@ const corsHeaders = {
 
 const WINDOW_DAYS = 3;
 
+// Games can be cached days before kickoff. Squads change (transfers, injuries, call-ups) in that
+// window, so a prediction generated once and never touched again can go stale for days. Re-run
+// predictions for any not-yet-played match whose cached row is older than this.
+const REFRESH_AFTER_MS = 24 * 60 * 60 * 1000;
+
 // Weight constants for the deterministic scoring layer — tune these once we have real outcome data.
 const PICK_HIT_WEIGHT = 0.08; // per-hit nudge away from the 2.5/5 baseline, for player props
 const PICK_CONFIDENCE_MIN = 0.3;
@@ -136,6 +141,14 @@ Rules:
 const buildPredictionPrompt = (matches: ScheduleMatch[]) => `
 You are an expert soccer analyst. Use web search to research current form, injuries, head-to-head history, and lineup news for each of the following FIFA World Cup matches, then predict a winner for each.
 
+SQUAD ACCURACY IS CRITICAL: player transfers, injuries, and squad call-ups happen constantly, and
+your training data can be out of date on this. Do NOT rely on prior/remembered knowledge of which
+national squad a player is part of. Before naming any player in topPicks, use web search to confirm
+they are CURRENTLY called up for that team's squad. Every player you list in a match's topPicks MUST
+currently be part of that match's homeTeam or awayTeam squad — if search results are unclear,
+conflicting, or you cannot confirm a player's current squad, do not use that player; pick a different
+one you can verify instead.
+
 Matches:
 ${matches.map((m, i) => `${i + 1}. ${m.homeTeam} vs ${m.awayTeam} (kickoff: ${m.kickoff}, gameId: ${m.gameId})`).join("\n")}
 
@@ -263,9 +276,17 @@ Deno.serve(async (req) => {
       }
     );
     const cachedRows: any[] = cacheResponse.ok ? await cacheResponse.json() : [];
-    const cachedById = new Map(cachedRows.map((row) => [row.game_id, row]));
+    const now = Date.now();
+    const isStale = (row: any): boolean => {
+      const kickoffTime = new Date(row.kickoff).getTime();
+      if (!Number.isNaN(kickoffTime) && kickoffTime <= now) return false; // already played — leave it
+      const createdAt = new Date(row.created_at).getTime();
+      return Number.isNaN(createdAt) || now - createdAt >= REFRESH_AFTER_MS;
+    };
+    const freshRows = cachedRows.filter((row) => !isStale(row));
+    const freshById = new Map(freshRows.map((row) => [row.game_id, row]));
 
-    const uncachedMatches = matches.filter((m) => !cachedById.has(m.gameId));
+    const uncachedMatches = matches.filter((m) => !freshById.has(m.gameId));
 
     let newGames: WorldCupGame[] = [];
     if (uncachedMatches.length > 0) {
@@ -305,13 +326,15 @@ Deno.serve(async (req) => {
         .filter((g): g is WorldCupGame => g !== null);
 
       if (newGames.length > 0) {
+        // merge-duplicates (not ignore-duplicates) so a stale row actually gets overwritten with the
+        // freshly re-researched prediction instead of silently keeping the old, possibly wrong one.
         await fetch(`${supabaseUrl}/rest/v1/world_cup_picks?on_conflict=game_id`, {
           method: "POST",
           headers: {
             apikey: serviceRoleKey,
             Authorization: `Bearer ${serviceRoleKey}`,
             "Content-Type": "application/json",
-            Prefer: "resolution=ignore-duplicates,return=minimal",
+            Prefer: "resolution=merge-duplicates,return=minimal",
           },
           body: JSON.stringify(
             newGames.map((g) => ({
@@ -326,13 +349,14 @@ Deno.serve(async (req) => {
               reasoning: g.reasoning,
               top_picks: g.topPicks,
               factors: g.factors,
+              created_at: new Date().toISOString(),
             }))
           ),
         });
       }
     }
 
-    const cachedGames: WorldCupGame[] = cachedRows.map((row) => ({
+    const cachedGames: WorldCupGame[] = freshRows.map((row) => ({
       gameId: row.game_id,
       kickoff: row.kickoff,
       homeTeam: row.home_team,

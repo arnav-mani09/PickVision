@@ -8,7 +8,7 @@ const GEMINI_MODEL_TEXT = "gemini-flash-latest";
 const buildPredictionPrompt = (parlayDetailsString: string) => `
 You are an expert sports analyst AI. You have been provided with details of a sports parlay.
 Your task is to:
-1.  USE YOUR WEB SEARCH CAPABILITIES (Google Search tool) to find relevant, up-to-date contextual information for each leg of the parlay. This includes team injury reports, player status, recent performance, win/loss streaks, and head-to-head data.
+1.  USE YOUR WEB SEARCH CAPABILITIES (Google Search tool) to find relevant, up-to-date contextual information for each leg of the parlay. This includes team injury reports, player status, recent performance, win/loss streaks, and head-to-head data. Rosters change via trades, free agency, and waivers — do not assume a player is still on the team you remember from training data; verify their current team via search, and flag it in context_summary if a leg references a player who has since moved teams.
 2.  Analyze the parlay in conjunction with the information you find.
 3.  Predict the overall outcome of the parlay (HIT or MISS).
 4.  Provide a concise "overall_summary" of your prediction, limited to a maximum of 3-4 short, scannable bullet points. Explain the key factors influencing your decision. Each bullet point MUST start with a hyphen (-) and end with a newline character (\\n).

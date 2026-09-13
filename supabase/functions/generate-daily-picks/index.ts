@@ -140,6 +140,12 @@ const buildPrompt = (league: string, leagueLabel: string, dateLabel: string, max
   return `
 You are an expert ${leagueLabel} props analyst. Use web search to find today's ${leagueLabel} games, available player props, and the strongest consensus or implied edges.
 Return the top ${maxProps} props with the absolute highest probability of hitting across all stat types.
+
+ROSTER ACCURACY IS CRITICAL: rosters change constantly via trades, free agency, and waivers, and your
+training data can be out of date on this. Do NOT rely on prior/remembered knowledge of which team a
+player is on. Before including any player, use web search to confirm they are on the CURRENT roster
+of a team playing in today's games and are expected to play. If you cannot confirm this, use a
+different player instead.
 ${statContext}
 Rules:
 - Each item MUST include: player, statLabel, side (Over/Under), line (must end with .5), matchup (optional), confidence (0-1, your own holistic read), reason (1 short sentence, max 18 words), last5Hits (integer 0-5 — in how many of this player's last 5 relevant games would this exact side/line have hit?).
