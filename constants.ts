@@ -22,4 +22,7 @@ export const STAT_CATEGORIES: StatCategory[] = [
 
 // Matches the publisher script already loaded in index.html.
 export const ADSENSE_CLIENT_ID = 'ca-pub-8586954616072867';
-export const ADSENSE_AD_SLOT = '5004370073';
+// Blank until the ad units are actually filling — AdBanner renders nothing and AdGate
+// skips straight to reveal (no placeholder box, no countdown) when this is empty.
+// Set back to '5004370073' once ads are in.
+export const ADSENSE_AD_SLOT = '';

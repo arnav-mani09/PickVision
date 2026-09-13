@@ -36,9 +36,15 @@ const soccerSubTabs = [
   { id: 'world-cup', label: 'World Cup' },
 ];
 
+const nflSubTabs = [
+  { id: 'games', label: 'Game Predictions' },
+  { id: 'props', label: 'Top 10 Player Props' },
+];
+
 export const PicksOfDay: React.FC = () => {
   const [activeTab, setActiveTab] = useState(sportsTabs[0]);
   const [activeSoccerSubTab, setActiveSoccerSubTab] = useState(soccerSubTabs[0]);
+  const [activeNflSubTab, setActiveNflSubTab] = useState(nflSubTabs[0]);
   const [topPropsByLeague, setTopPropsByLeague] = useState<Record<string, DailyProp[]>>({});
   const [activeParlaySize, setActiveParlaySize] = useState<2 | 3 | 4 | 6 | null>(null);
 
@@ -88,26 +94,21 @@ export const PicksOfDay: React.FC = () => {
           </div>
         </div>
 
-        {activeTab.id === 'nba' || activeTab.id === 'nfl' ? (
-          <>
-            {activeTab.id === 'nfl' && (
-              <div className="space-y-3">
-                <h4 className="text-lg font-semibold text-purple-300">This Week&apos;s Game Predictions</h4>
-                <NflPicks />
-              </div>
-            )}
-            <DailyProps
-              key={activeTab.id}
-              leagueId={activeTab.id}
-              leagueLabel={activeTab.label}
-              onPropsLoaded={(props) =>
-                setTopPropsByLeague((prev) => ({
-                  ...prev,
-                  [activeTab.id]: props,
-                }))
-              }
-            />
-            <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-5">
+        {(() => {
+          const propsAndParlaySection = (
+            <>
+              <DailyProps
+                key={activeTab.id}
+                leagueId={activeTab.id}
+                leagueLabel={activeTab.label}
+                onPropsLoaded={(props) =>
+                  setTopPropsByLeague((prev) => ({
+                    ...prev,
+                    [activeTab.id]: props,
+                  }))
+                }
+              />
+              <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-5">
               <h4 className="text-lg font-semibold text-purple-300">Parlay Builder</h4>
               <p className="text-sm text-gray-400 mt-2">
                 Auto-build parlays from the best picks in {activeTab.label}.
@@ -179,39 +180,74 @@ export const PicksOfDay: React.FC = () => {
                   )}
                 </div>
               )}
+              </div>
+            </>
+          );
+
+          if (activeTab.id === 'nfl') {
+            return (
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {nflSubTabs.map((subTab) => (
+                    <button
+                      key={subTab.id}
+                      type="button"
+                      onClick={() => setActiveNflSubTab(subTab)}
+                      className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                        activeNflSubTab.id === subTab.id
+                          ? 'bg-purple-500 text-white'
+                          : 'bg-gray-800/80 text-gray-300 hover:bg-gray-700'
+                      }`}
+                    >
+                      {subTab.label}
+                    </button>
+                  ))}
+                </div>
+                {activeNflSubTab.id === 'games' ? <NflPicks /> : propsAndParlaySection}
+              </div>
+            );
+          }
+
+          if (activeTab.id === 'nba') {
+            return propsAndParlaySection;
+          }
+
+          if (activeTab.id === 'soccer') {
+            return (
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {soccerSubTabs.map((subTab) => (
+                    <button
+                      key={subTab.id}
+                      type="button"
+                      onClick={() => setActiveSoccerSubTab(subTab)}
+                      className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                        activeSoccerSubTab.id === subTab.id
+                          ? 'bg-purple-500 text-white'
+                          : 'bg-gray-800/80 text-gray-300 hover:bg-gray-700'
+                      }`}
+                    >
+                      {subTab.label}
+                    </button>
+                  ))}
+                </div>
+                <WorldCupPicks />
+              </div>
+            );
+          }
+
+          return (
+            <div className="rounded-2xl border border-purple-500/30 bg-black/70 p-8 text-center shadow-[0_0_30px_rgba(168,85,247,0.35)]">
+              <p className="text-xs uppercase tracking-[0.35em] text-purple-200/70">Coming Soon</p>
+              <h4 className="mt-3 text-xl font-semibold text-white">
+                {activeTab.label} Picks Are On The Way
+              </h4>
+              <p className="mt-2 text-sm text-gray-400">
+                We&apos;ll bring these leagues back once the next update lands.
+              </p>
             </div>
-          </>
-        ) : activeTab.id === 'soccer' ? (
-          <div className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              {soccerSubTabs.map((subTab) => (
-                <button
-                  key={subTab.id}
-                  type="button"
-                  onClick={() => setActiveSoccerSubTab(subTab)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                    activeSoccerSubTab.id === subTab.id
-                      ? 'bg-purple-500 text-white'
-                      : 'bg-gray-800/80 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  {subTab.label}
-                </button>
-              ))}
-            </div>
-            <WorldCupPicks />
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-purple-500/30 bg-black/70 p-8 text-center shadow-[0_0_30px_rgba(168,85,247,0.35)]">
-            <p className="text-xs uppercase tracking-[0.35em] text-purple-200/70">Coming Soon</p>
-            <h4 className="mt-3 text-xl font-semibold text-white">
-              {activeTab.label} Picks Are On The Way
-            </h4>
-            <p className="mt-2 text-sm text-gray-400">
-              We&apos;ll bring these leagues back once the next update lands.
-            </p>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </Card>
   );
