@@ -4,6 +4,7 @@ import { Input } from "./components/ui/Input";
 import { Button } from "./components/ui/Button";
 import { LoadingSpinner } from "./components/ui/LoadingSpinner";
 import { AdBanner } from "./components/ui/AdBanner";
+import { PicksPreview } from "./components/PicksPreview";
 import type { User } from "./types";
 interface LandingPageProps {
   onLoginSuccess: (user: User) => void;
@@ -72,7 +73,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         </div>
         <nav className="hidden md:flex gap-6 text-sm text-gray-300">
           <a href="#news" className="hover:text-white">Sports News</a>
-          <a href="#articles" className="hover:text-white">Articles</a>
+          <a href="#picks-preview" className="hover:text-white">Today&apos;s Picks</a>
           <a href="#get-started" className="hover:text-white">Get Started</a>
         </nav>
         <button
@@ -192,66 +193,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           </div>
         </section>
 
-        <section id="articles" className="px-6 py-16 md:py-20 bg-gradient-to-b from-gray-950 to-black">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-white">Featured Betting Reads</h2>
-            <p className="mt-3 text-gray-400">
-              Curated reads to sharpen your edge. Replace these with your own original articles as you publish.
-            </p>
-            <div className="mt-8 grid md:grid-cols-2 gap-6">
-              {[
-                {
-                  title: "How Injury Reports Move Lines Overnight",
-                  link: "https://www.espn.com/chalk/",
-                  tag: "Market Movement",
-                  image:
-                    "/injury.jpg",
-                },
-                {
-                  title: "Props vs. Parlays: When to Go Single-Play",
-                  link: "https://www.espn.com/chalk/",
-                  tag: "Strategy",
-                  image:
-                    "/prop.jpg",
-                },
-                {
-                  title: "Tracking Streaks Without Chasing",
-                  link: "https://www.espn.com/chalk/",
-                  tag: "Discipline",
-                  image:
-                    "/streak.jpeg",
-                },
-                {
-                  title: "The Matchup Matrix: Finding Hidden Value",
-                  link: "https://www.espn.com/chalk/",
-                  tag: "Analytics",
-                  image:
-                    "/value.jpg",
-                },
-              ].map((article) => (
-                <a
-                  key={article.title}
-                  href={article.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative rounded-xl border border-white/10 overflow-hidden"
-                >
-                  <div
-                    className="h-56 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${article.image})` }}
-                  />
-                  <div className="p-5 bg-black/80">
-                    <span className="text-xs text-purple-300 uppercase tracking-wide">{article.tag}</span>
-                    <h3 className="mt-2 text-lg font-semibold text-white group-hover:text-purple-200">
-                      {article.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-gray-400">Read more →</p>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
+        <PicksPreview />
 
         <section id="get-started" className="px-6 py-16 md:py-20">
           <div className="max-w-5xl mx-auto text-center">
