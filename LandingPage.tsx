@@ -195,6 +195,35 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
 
         <PicksPreview />
 
+        <section id="how-it-works" className="px-6 py-16 md:py-20">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-white">How PickVision Works</h2>
+            <div className="mt-6 space-y-5 text-gray-300 leading-relaxed">
+              <p>
+                Every morning, PickVision's AI researches that day's games across the NFL, NBA, and
+                other leagues — pulling current matchups, injury news, recent form, and prop markets —
+                and ranks the player props with the strongest edge. Each pick comes with a plain-English
+                reason so you can see the actual basis for it, not just a number.
+              </p>
+              <p>
+                For NFL games specifically, PickVision also generates a per-game prediction: a projected
+                winner, a confidence score, and the reasoning behind it, built from the same research
+                pass along with each team's recent scoring and defensive trends.
+              </p>
+              <p>
+                The Parlay Lab works the other direction: upload a screenshot of a parlay you're
+                considering, and PickVision extracts each leg, checks it against current data, and
+                gives you a leg-by-leg read on how it holds up — so you can catch a shaky leg before you
+                place the bet, not after.
+              </p>
+              <p className="text-sm text-gray-500">
+                PickVision is built for entertainment and informational purposes. It does not guarantee
+                outcomes — always bet responsibly and within your means.
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section id="get-started" className="px-6 py-16 md:py-20">
           <div className="max-w-5xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-white">Ready to Analyze Your Parlays?</h2>

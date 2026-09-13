@@ -8,6 +8,7 @@ type PreviewPick = {
   line: string;
   confidence?: number;
   matchup?: string;
+  reason?: string;
 };
 
 const formatPstDate = (date: Date = new Date()) => {
@@ -46,7 +47,16 @@ export const PicksPreview: React.FC = () => {
                 (p: any) => p.player && p.statLabel && (p.side === 'Over' || p.side === 'Under') && p.line
               )
               .sort((a: any, b: any) => (b.confidence ?? 0) - (a.confidence ?? 0))
-              .slice(0, 3);
+              .slice(0, 3)
+              .map((p: any) => ({
+                player: p.player,
+                statLabel: p.statLabel,
+                side: p.side,
+                line: p.line,
+                confidence: p.confidence,
+                matchup: p.matchup,
+                reason: p.reason,
+              }));
             return [league.id, cleaned] as const;
           } catch (_) {
             return [league.id, []] as const;
@@ -100,6 +110,9 @@ export const PicksPreview: React.FC = () => {
                         {pick.statLabel} • {pick.side} {pick.line}
                         {pick.matchup ? ` • ${pick.matchup}` : ''}
                       </p>
+                      {pick.reason && (
+                        <p className="text-xs text-gray-500 mt-1.5">{pick.reason}</p>
+                      )}
                     </div>
                   ))}
                 </div>
