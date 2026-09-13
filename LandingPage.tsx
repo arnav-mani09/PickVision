@@ -5,12 +5,27 @@ import { Button } from "./components/ui/Button";
 import { LoadingSpinner } from "./components/ui/LoadingSpinner";
 import { AdBanner } from "./components/ui/AdBanner";
 import { PicksPreview } from "./components/PicksPreview";
+import { HomeSection } from "./components/landing/HomeSection";
+import { NewsSection } from "./components/landing/NewsSection";
+import { HowItWorksSection } from "./components/landing/HowItWorksSection";
+import { GetStartedSection } from "./components/landing/GetStartedSection";
 import type { User } from "./types";
 interface LandingPageProps {
   onLoginSuccess: (user: User) => void;
 }
 
+type LandingSection = "home" | "news" | "picks" | "how-it-works" | "get-started";
+
+const NAV_TABS: { id: LandingSection; label: string }[] = [
+  { id: "home", label: "Home" },
+  { id: "news", label: "Sports News" },
+  { id: "picks", label: "Today's Picks" },
+  { id: "how-it-works", label: "How It Works" },
+  { id: "get-started", label: "Get Started" },
+];
+
 export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
+  const [activeSection, setActiveSection] = useState<LandingSection>("home");
   const [isLoginView, setIsLoginView] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -71,11 +86,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           />
           <span className="font-semibold text-lg tracking-wide text-gray-100">PickVision</span>
         </div>
-        <nav className="hidden md:flex gap-6 text-sm text-gray-300">
-          <a href="#news" className="hover:text-white">Sports News</a>
-          <a href="#picks-preview" className="hover:text-white">Today&apos;s Picks</a>
-          <a href="#get-started" className="hover:text-white">Get Started</a>
-        </nav>
         <button
           onClick={() => setShowLogin(!showLogin)}
           className="bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white font-semibold py-2 px-4 rounded-xl shadow-lg hover:scale-[1.02] transition-transform duration-300"
@@ -84,160 +94,35 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         </button>
       </header>
 
-      <main className="relative z-10">
-        <section className="relative px-6 py-16 md:py-24">
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.25),transparent_55%)]" />
-          </div>
-          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight">
-                PickVision AI: Smarter Sports Betting Analysis
-              </h1>
-              <p className="mt-4 text-gray-300 text-lg">
-                Upload your parlay, verify each leg, and get sharper insights with contextual data,
-                trends, and AI-powered suggestions. Built for bettors who want clarity without the noise.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-4">
-                <a
-                  href="#get-started"
-                  className="bg-purple-600 text-white font-semibold px-5 py-3 rounded-lg shadow hover:bg-purple-500"
-                >
-                  Start Exploring
-                </a>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="absolute -inset-6 bg-purple-600/10 blur-2xl rounded-full" />
-              <div className="relative grid grid-cols-3 gap-4">
-                <img
-                  src="/parlay2.png"
-                  alt="Parlay Left"
-                  className="rounded-xl border border-purple-500/40 shadow-[0_0_25px_rgba(168,85,247,0.4)]"
-                />
-                <img
-                  src="/parlay1.png"
-                  alt="Parlay Center"
-                  className="rounded-xl border border-purple-500/60 shadow-[0_0_30px_rgba(168,85,247,0.7)] animate-gentleFloat"
-                />
-                <img
-                  src="/parlay3.png"
-                  alt="Parlay Right"
-                  className="rounded-xl border border-purple-500/40 shadow-[0_0_25px_rgba(168,85,247,0.4)]"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="news" className="px-6 py-16 md:py-20">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-white">Sports News by League</h2>
-            <p className="mt-3 text-gray-400">
-              Browse recent updates across major sports. Each card links to fresh coverage.
-            </p>
-            <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                {
-                  title: "NBA",
-                  link: "https://www.espn.com/nba/",
-                  image:
-                    "https://upload.wikimedia.org/wikipedia/en/0/03/National_Basketball_Association_logo.svg",
-                },
-                {
-                  title: "NFL",
-                  link: "https://www.espn.com/nfl/",
-                  image:
-                    "https://upload.wikimedia.org/wikipedia/en/a/a2/National_Football_League_logo.svg",
-                },
-                {
-                  title: "MLB",
-                  link: "https://www.espn.com/mlb/",
-                  image:
-                    "/mlb.png",
-                },
-                {
-                  title: "Soccer",
-                  link: "https://www.espn.com/soccer/",
-                  image: "",
-                },
-              ].map((item) => (
-                <a
-                  key={item.title}
-                  href={item.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative h-48 rounded-xl overflow-hidden border border-white/10 bg-black"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/70 to-black/90" />
-                  <div className="relative h-full flex flex-col items-center justify-center gap-3">
-                    {item.image ? (
-                      <img
-                        src={item.image}
-                        alt={`${item.title} logo`}
-                        className="h-16 w-auto drop-shadow-[0_0_12px_rgba(255,255,255,0.35)]"
-                      />
-                    ) : (
-                      <div className="h-16 w-16 rounded-full bg-white/10 flex items-center justify-center text-2xl">
-                        ⚽
-                      </div>
-                    )}
-                    <div className="text-center">
-                      <span className="text-lg font-semibold text-white">{item.title}</span>
-                      <p className="text-xs text-gray-300">Latest headlines</p>
-                    </div>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <PicksPreview />
-
-        <section id="how-it-works" className="px-6 py-16 md:py-20">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-white">How PickVision Works</h2>
-            <div className="mt-6 space-y-5 text-gray-300 leading-relaxed">
-              <p>
-                Every morning, PickVision's AI researches that day's games across the NFL, NBA, and
-                other leagues — pulling current matchups, injury news, recent form, and prop markets —
-                and ranks the player props with the strongest edge. Each pick comes with a plain-English
-                reason so you can see the actual basis for it, not just a number.
-              </p>
-              <p>
-                For NFL games specifically, PickVision also generates a per-game prediction: a projected
-                winner, a confidence score, and the reasoning behind it, built from the same research
-                pass along with each team's recent scoring and defensive trends.
-              </p>
-              <p>
-                The Parlay Lab works the other direction: upload a screenshot of a parlay you're
-                considering, and PickVision extracts each leg, checks it against current data, and
-                gives you a leg-by-leg read on how it holds up — so you can catch a shaky leg before you
-                place the bet, not after.
-              </p>
-              <p className="text-sm text-gray-500">
-                PickVision is built for entertainment and informational purposes. It does not guarantee
-                outcomes — always bet responsibly and within your means.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section id="get-started" className="px-6 py-16 md:py-20">
-          <div className="max-w-5xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-white">Ready to Analyze Your Parlays?</h2>
-            <p className="mt-3 text-gray-400">
-              Keep your edge sharp with fast, AI-driven analysis and a clean betting workflow.
-            </p>
+      <nav className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-6 py-3 overflow-x-auto">
+        <div className="flex gap-2 max-w-6xl mx-auto w-max md:w-full">
+          {NAV_TABS.map((tab) => (
             <button
-              onClick={() => setShowLogin(true)}
-              className="mt-6 bg-purple-600 text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-purple-500"
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveSection(tab.id)}
+              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                activeSection === tab.id
+                  ? "bg-purple-600 text-white"
+                  : "bg-gray-800/80 text-gray-300 hover:bg-gray-700"
+              }`}
             >
-              Sign In / Sign Up
+              {tab.label}
             </button>
-          </div>
-        </section>
+          ))}
+        </div>
+      </nav>
+
+      <main className="relative z-10">
+        {activeSection === "home" && (
+          <HomeSection onStartExploring={() => setActiveSection("get-started")} />
+        )}
+        {activeSection === "news" && <NewsSection />}
+        {activeSection === "picks" && <PicksPreview />}
+        {activeSection === "how-it-works" && <HowItWorksSection />}
+        {activeSection === "get-started" && (
+          <GetStartedSection onGetStarted={() => setShowLogin(true)} />
+        )}
       </main>
 
       {showLogin && (

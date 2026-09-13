@@ -77,9 +77,14 @@ export const PicksPreview: React.FC = () => {
     <section id="picks-preview" className="px-6 py-16 md:py-20 bg-gradient-to-b from-gray-950 to-black">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-white">Today&apos;s AI Picks</h2>
-        <p className="mt-3 text-gray-400">
+        <p className="mt-3 text-gray-400 max-w-2xl">
           A live sample of PickVision&apos;s AI-generated player props, refreshed daily. Sign in free
           for the full Top 10 in every league plus game-by-game win predictions.
+        </p>
+        <p className="mt-2 text-xs text-gray-500 max-w-2xl">
+          The confidence percentage on each pick is derived from how often that exact side and line
+          would have hit across the player&apos;s last five relevant games — it&apos;s a signal of
+          recent strength, not a guarantee.
         </p>
         <div className="mt-8 grid md:grid-cols-2 gap-6">
           {PREVIEW_LEAGUES.map((league) => (
