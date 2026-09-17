@@ -260,18 +260,49 @@ Deno.serve(async (req) => {
     }
 
     const endDate = addDays(date, WINDOW_DAYS);
-    const scheduleParsed = await withRetry(async () => {
-      const scheduleRaw = await callGemini(geminiKey, buildSchedulePrompt(date, endDate));
-      return extractJson<{ matches: Omit<ScheduleMatch, "gameId">[] }>(scheduleRaw);
-    });
-    const matches: ScheduleMatch[] = (scheduleParsed.matches ?? [])
-      .filter(
-        (m) => typeof m?.kickoff === "string" && typeof m?.homeTeam === "string" && typeof m?.awayTeam === "string"
-      )
-      .map((m) => ({
-        ...m,
-        gameId: toGameId(m.homeTeam, m.awayTeam, m.kickoff),
-      }));
+
+    // The schedule barely changes within a day — cache it per requested date (mirrors daily_picks'
+    // per-day caching) instead of re-running a live grounded search on every single request,
+    // including the frontend's 30-minute background refresh from any open tab.
+    let matches: ScheduleMatch[];
+    const scheduleCacheResponse = await fetch(
+      `${supabaseUrl}/rest/v1/nfl_schedule_cache?date=eq.${date}&select=matches`,
+      {
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+        },
+      }
+    );
+    const scheduleCacheRows: any[] = scheduleCacheResponse.ok ? await scheduleCacheResponse.json() : [];
+
+    if (scheduleCacheRows.length > 0 && Array.isArray(scheduleCacheRows[0].matches)) {
+      matches = scheduleCacheRows[0].matches;
+    } else {
+      const scheduleParsed = await withRetry(async () => {
+        const scheduleRaw = await callGemini(geminiKey, buildSchedulePrompt(date, endDate));
+        return extractJson<{ matches: Omit<ScheduleMatch, "gameId">[] }>(scheduleRaw);
+      });
+      matches = (scheduleParsed.matches ?? [])
+        .filter(
+          (m) => typeof m?.kickoff === "string" && typeof m?.homeTeam === "string" && typeof m?.awayTeam === "string"
+        )
+        .map((m) => ({
+          ...m,
+          gameId: toGameId(m.homeTeam, m.awayTeam, m.kickoff),
+        }));
+
+      await fetch(`${supabaseUrl}/rest/v1/nfl_schedule_cache?on_conflict=date`, {
+        method: "POST",
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+          "Content-Type": "application/json",
+          Prefer: "resolution=merge-duplicates,return=minimal",
+        },
+        body: JSON.stringify([{ date, matches }]),
+      });
+    }
 
     if (matches.length === 0) {
       return new Response(JSON.stringify({ games: [] }), {
